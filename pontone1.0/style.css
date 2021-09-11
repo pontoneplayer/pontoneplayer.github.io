@@ -1,0 +1,129 @@
+@charset "UTF-8";
+/* CSS Document */
+body{
+    /*display:flex;
+    align-items: center;
+    justify-content: center;*/
+ 	background-color:rgba(50,50,50,1.00);    
+}
+
+.body_div{
+    display: flex;          /* Flexboxを指定 */
+    justify-content: space-around;  /*水平方向の中央寄せ */
+    align-items: center;  /* 垂直方向の中央寄せ */
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+    /*background-color:rgba(255,255,255,1.00);  */
+}
+#button_background{
+    display:flex;
+	flex-direction:row;
+  	flex-wrap:wrap;
+    justify-content:space-around;
+	align-content: space-around;
+    width:720px;
+	/*height:300px;*/
+	border-radius: 10px;
+	color: white;
+	background-color:rgba(255,255,255,1.00);    
+}
+.button{
+ 	display:flex;
+	flex-direction: column;
+    align-content: space-between;
+    position: relative;
+ 	width:100px;
+	height:100px;
+    border: 2px solid black;
+	border-radius: 5px;
+	/*background-color:rgba(255,255,255,1.00)*/
+}
+.b_lay{
+	z-index:1;
+ 	display:block;
+    /*align-content: space-between;*/
+	/*align-items: center;*/
+    position: absolute;
+    left:0;
+    top:0;
+ 	width:100px;
+	height:100px;
+    /*border: 2px solid black;*/
+	border-radius: 5px;
+	background-color:rgba(255,255,255,0.00)
+}
+
+.color-b0{
+    background-color:rgba(255,255,255,0.00);
+}
+.bn_div{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline; 
+}
+.b_number{font-size: 12pt; margin-left: 2px;}
+.b_time{font-size: 10pt; margin-right: 2px;}
+
+.bd_div{
+    display: block;
+    /*justify-content: flex-end;*/
+	text-align: right;
+}
+.d_name{font-size: 10pt; margin-right: 2px;}
+
+.confirm_background_style{
+	z-index:2;
+    display: none;
+    justify-content: center;
+    align-items: center;
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background-color:rgba(0,0,0,0.30);
+}
+
+.confirm_lay_style{
+	z-index:3;
+	display:none;
+	height:auto;
+	width:auto;
+/*    max-width: 600px*/;
+	/*position:static;*/
+    /*top: 20%;*/
+    margin: auto;
+    font-size: 12pt;
+    /*vertical-align: middle;*/
+    border: 2px solid black;
+	border-radius: 5px;
+	background-color:white;
+}
+.confirm_lay_div{
+	display:flex;
+	height:180px;
+	width:240px;
+	flex-direction: column;
+	align-items: center;
+	align-content: space-around;
+	justify-content: space-around;
+}
+.confirm_div_button{
+	display:flex;
+	flex-direction:row ;
+	align-items: center;
+	justify-content:space-around
+}
+
+.hyouji_table { 
+	width: 90%; 
+	/*border: solid 0.4mm black; 
+	border-collapse:collapse;*/
+}
+
+.size_12 { font-size: 12pt ;}
+.size_13 { font-size: 13pt ;}
+.size_14 { font-size: 14pt ;}
