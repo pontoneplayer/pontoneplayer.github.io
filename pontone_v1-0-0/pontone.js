@@ -338,25 +338,35 @@ function drop(e){
 	if(e.target.id.indexOf("bld-")>=0){
         console.log("drop "+e.target.id);
 		file_id=e.target.id;
+		let drop_func=()=>{
+			const drop_files = e.dataTransfer.files;
+			debi("bdn-"+file_id.split("-")[1]).innerHTML=drop_files[0].name;
+			button_array[Number(file_id.split("-")[1])].name=drop_files[0].name;
+			let create=URL.createObjectURL(drop_files[0]);// faster than readAsDataURL()
+			//let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
+			//button_array[Number(file_id.split("-")[1])].data= create; 
+			button_array[Number(file_id.split("-")[1])].data= drop_files[0].type; 
+			if(drop_files[0].type.indexOf("audio")>=0){
+				debi("movie-"+file_id.split("-")[1]).innerHTML='<video id="mov-'+file_id.split("-")[1]+'" hieght="0px" width="0px"></video>';
+				debi("mov-"+file_id.split("-")[1]).src=create;
+				button_array[Number(file_id.split("-")[1])].url=create;
+				debi("b-"+file_id.split("-")[1]).style.backgroundColor="rgba("+button_array[file_id.split("-")[1]].color+")";
+				debi("mov-"+file_id.split("-")[1]).addEventListener("loadedmetadata", ()=>{
+					debi("bt-"+file_id.split("-")[1]).innerHTML=data_duration(debi("mov-"+file_id.split("-")[1]).duration)+" s"; 
+				});
+			}
+		}
         e.stopPropagation();
         e.preventDefault();
-		if(debi("bnn-"+file_id.split("-")[1]).style.color!="black"){
-		const drop_files = e.dataTransfer.files;
-		debi("bdn-"+file_id.split("-")[1]).innerHTML=drop_files[0].name;
-		button_array[Number(file_id.split("-")[1])].name=drop_files[0].name;
-		let create=URL.createObjectURL(drop_files[0]);// faster than readAsDataURL()
-		//let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
-		//button_array[Number(file_id.split("-")[1])].data= create; 
-		button_array[Number(file_id.split("-")[1])].data= drop_files[0].type; 
-		if(drop_files[0].type.indexOf("audio")>=0){
-			debi("movie-"+file_id.split("-")[1]).innerHTML='<video id="mov-'+file_id.split("-")[1]+'" hieght="0px" width="0px"></video>';
-			debi("mov-"+file_id.split("-")[1]).src=create;
-			button_array[Number(file_id.split("-")[1])].url=create;
-			debi("b-"+file_id.split("-")[1]).style.backgroundColor="rgba("+button_array[file_id.split("-")[1]].color+")";
-			debi("mov-"+file_id.split("-")[1]).addEventListener("loadedmetadata", ()=>{
-				debi("bt-"+file_id.split("-")[1]).innerHTML=data_duration(debi("mov-"+file_id.split("-")[1]).duration)+" s"; 
-			});
+		if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
+			console.log('movie==""');
+			drop_func();
 		}
+		else{
+			if(debi("mov-"+e.target.id.split("-")[1]).paused){
+				console.log("mov.paused");
+				drop_func();
+			}
 		}
 	}
 }
