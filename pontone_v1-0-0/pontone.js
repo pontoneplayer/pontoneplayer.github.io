@@ -6,27 +6,27 @@ function key_down(event){//
 				if(button_array[i].data.indexOf("audio")>=0){
 					debi("mov-"+i).pause();
 					debi("mov-"+i).currentTime = 0;
-					clearInterval(button_array[i].timer);//function
+					clearInterval(button_array[i].timer);//function name
 					//console.log("clear setInterval-ID="+button_array[i].timer);
-					{//clearInterval誤作動防止
+					{//clearInterval zombie on console cleared
 						debi("movie-"+i).innerHTML="";
-						debi("movie-"+i).innerHTML='<video id="mov-'+i+'" hieght="0px" width="0px"></video>';
+						debi("movie-"+i).innerHTML='<video id="mov-'+i+'" height="0px" width="0px"></video>';
 						debi("mov-"+i).src=button_array[i].url;
 						//console.log(debi("mov-"+i).src);
 						debi("mov-"+i).addEventListener("loadedmetadata", ()=>{
-							debi("bt-"+i).innerHTML=data_duration(debi("mov-"+i).duration)+" s"; 
+							debi("bt-"+i).innerHTML=data_duration(debi("mov-"+i).duration); 
 						});
 					}
 				}
 				else{
-					open("movie.html","Display Window",window_options);
-					window.focus();
+					//open("movie.html","Display Window",window_options);
+					//window.focus();
 				}
 				debi("b-"+i).style.backgroundColor="rgba("+button_array[i].color+")";
 				debi("bnd-"+i).style.backgroundColor="";
 				debi("bld-"+i).style.backgroundColor="rgba(255,255,255,0.00)";
 				debi("bnn-"+i).style.color="white";
-				//debi("bt-"+array_num).innerHTML=debi("mov-"+array_num).duration.toFixed(1)+" s";
+				//debi("bt-"+array_num).innerHTML=debi("mov-"+array_num).duration.toFixed(1);
 				debi("bt-"+i).style.color="white";
 				debi("bdn-"+i).style.color="white";
 				button_array[i].on=0;
@@ -41,7 +41,7 @@ function debi(id){
 	return document.getElementById(id);
 }
 
-function myButton(){//ボタンオブジェクト
+function myButton(){//button object
 	this.color="45,225,225,1.00";
     this.on=0;
 	this.data=""
@@ -56,12 +56,10 @@ var window_options = "menubar=no,location=yes,resizable=yes,scrollbars=no,status
 function make_buttons(){
     for(let i=0;i<24;i++){
 		button_array.push(new myButton());
-		//console.log("button_array["+i+"].color="+button_array[i].color);
 		let high_limit=225;
 		let low_limit=45;
 		if(i!=0){
 			let b1_color=button_array[i-1].color;
-			//console.log("b1_color="+b1_color);
 			let target_color="";
 			if(button_array[i-2]==undefined){
 				let r_n=b1_color.split(",")[0];
@@ -77,10 +75,8 @@ function make_buttons(){
 				let r1_n=Number(b1_color.split(",")[0]);
 				let g1_n=Number(b1_color.split(",")[1]);
 				let b1_n=Number(b1_color.split(",")[2]);
-				//console.log(r2_n+","+g2_n+","+b2_n+","+r1_n+","+g1_n+","+b1_n);
 
 				if(g1_n==high_limit && r2_n-r1_n<0){
-					//console.log("red!");
 					if(r1_n!=g1_n){
 						target_color=(r1_n+60)+','+g1_n+','+b1_n+','+1.00;
 					}
@@ -89,7 +85,6 @@ function make_buttons(){
 					}
 				}
 				else if(g1_n==low_limit && r2_n-r1_n>0){
-					//console.log("red!");
 					if(r1_n!=g1_n){
 						target_color=(r1_n-60)+','+g1_n+','+b1_n+','+1.00;
 					}
@@ -98,7 +93,6 @@ function make_buttons(){
 					}
 				}
 				else if(b1_n==low_limit && g2_n-g1_n>0){
-					//console.log("green!");
 					if(g1_n!=b1_n){
 						target_color=r1_n+','+(g1_n-60)+','+b1_n+','+1.00;
 					}
@@ -107,7 +101,6 @@ function make_buttons(){
 					}
 				}
 				else if(b1_n==high_limit && g2_n-g1_n<0){
-					//console.log("green!");
 					if(g1_n!=b1_n){
 						target_color=r1_n+','+(g1_n+60)+','+b1_n+','+1.00;
 					}
@@ -116,7 +109,6 @@ function make_buttons(){
 					}
 				}
 				else if(r1_n==high_limit && b2_n-b1_n<0){
-					//console.log("blue!");
 					if(r1_n!=b1_n){
 						target_color=r1_n+','+g1_n+','+(b1_n+60)+','+1.00;
 					}
@@ -125,7 +117,6 @@ function make_buttons(){
 					}
 				}
 				else if(r1_n==low_limit && b2_n-b1_n>0){
-					//console.log("blue!");
 					if(r1_n!=b1_n){
 						target_color=r1_n+','+g1_n+','+(b1_n-60)+','+1.00;
 					}
@@ -160,7 +151,7 @@ function make_buttons(){
             buttons_line+='<div id="bld-'+i+'" class="b_lay">';
             buttons_line+='</div>';
             buttons_line+='<div id="movie-'+i+'">';
-				//buttons_line+='<video id="mov-'+i+'" hieght="0px" width="0px"></video>';
+				//buttons_line+='<video id="mov-'+i+'" height="0px" width="0px"></video>';
 			buttons_line+='</div>';
 		buttons_line+='</div>';
 		debi("button_background").innerHTML+=buttons_line;
@@ -185,19 +176,19 @@ function trans_color(get_color,num,cn){
 	
 }
 
-function t_remain(){// 
+function t_remain(){
 	let remaining=(debi("mov-"+array_num).duration-debi("mov-"+array_num).currentTime);
 	let second;
 	if(Math.floor(remaining/60)==0){
-		remaining=remaining.toFixed(1)+" s";
+		remaining=remaining.toFixed(1);
 	}
 	else{
 		if((remaining-(60*Math.floor(remaining/60))).toFixed(1)<10){
 			second="0"+(remaining-(60*Math.floor(remaining/60))).toFixed(1);
-			remaining=Math.floor(remaining/60)+"'"+second+" s";
+			remaining=Math.floor(remaining/60)+"'"+second;
 		}
 		else{
-			remaining=Math.floor(remaining/60)+"'"+(remaining-(60*Math.floor(remaining/60))).toFixed(1)+" s";
+			remaining=Math.floor(remaining/60)+"'"+(remaining-(60*Math.floor(remaining/60))).toFixed(1);
 		}
 		
 	}
@@ -216,19 +207,19 @@ document.addEventListener('click', (e)=>{
 							if(button_array[i].data.indexOf("audio")>=0){
 								debi("mov-"+i).pause();
 								debi("mov-"+i).currentTime = 0;;
-                                clearInterval(button_array[i].timer);//function
-								{//clearInterval誤作動防止
+                                clearInterval(button_array[i].timer);//function name
+								{//clearInterval zombie on console cleared
 									debi("movie-"+i).innerHTML="";
-									debi("movie-"+i).innerHTML='<video id="mov-'+i+'" hieght="0px" width="0px"></video>';
+									debi("movie-"+i).innerHTML='<video id="mov-'+i+'" height="0px" width="0px"></video>';
 									debi("mov-"+i).src=button_array[i].url;
 									debi("mov-"+i).addEventListener("loadedmetadata", ()=>{
-										debi("bt-"+i).innerHTML=data_duration(debi("mov-"+i).duration)+" s"; 
+										debi("bt-"+i).innerHTML=data_duration(debi("mov-"+i).duration); 
 									});
 								}
 							}
 							else{
-								open("movie.html","Display Window",window_options);
-								window.focus();
+								//open("movie.html","Display Window",window_options);
+								//window.focus();
 							}
 							debi("b-"+i).style.backgroundColor="rgba("+button_array[i].color+")";
 							debi("bnd-"+i).style.backgroundColor="";
@@ -242,14 +233,14 @@ document.addEventListener('click', (e)=>{
                     }
                     array_num=Number(e.target.id.split("-")[1]);
 					debi("mov-"+array_num).addEventListener("ended", ()=>{
-						console.log("ended in !");
-						clearInterval(button_array[array_num].timer);
-						{//clearInterval誤作動防止
+						//console.log("ended in !");
+						clearInterval(button_array[array_num].timer);//function name
+						{//clearInterval zombie on console cleared
 							debi("movie-"+array_num).innerHTML="";
-							debi("movie-"+array_num).innerHTML='<video id="mov-'+array_num+'" hieght="0px" width="0px"></video>';
+							debi("movie-"+array_num).innerHTML='<video id="mov-'+array_num+'" height="0px" width="0px"></video>';
 							debi("mov-"+array_num).src=button_array[array_num].url;
 							debi("mov-"+array_num).addEventListener("loadedmetadata", ()=>{
-								debi("bt-"+array_num).innerHTML=data_duration(debi("mov-"+array_num).duration)+" s"; 
+								debi("bt-"+array_num).innerHTML=data_duration(debi("mov-"+array_num).duration); 
 								array_num=-1;
 							});
 						}
@@ -283,20 +274,20 @@ document.addEventListener('click', (e)=>{
 				if(button_array[array_num].data.split(",")[0].indexOf("audio")>=0){
 					debi("mov-"+array_num).pause();
 					debi("mov-"+array_num).currentTime = 0;
-					clearInterval(button_array[array_num].timer);
-					{//clearInterval誤作動防止
+					clearInterval(button_array[array_num].timer)//function name
+					{//clearInterval zombie on console cleared
 						debi("movie-"+array_num).innerHTML="";
-						debi("movie-"+array_num).innerHTML='<video id="mov-'+array_num+'" hieght="0px" width="0px"></video>';
+						debi("movie-"+array_num).innerHTML='<video id="mov-'+array_num+'" height="0px" width="0px"></video>';
 						debi("mov-"+array_num).src=button_array[array_num].url;
 						debi("mov-"+array_num).addEventListener("loadedmetadata", ()=>{
-							debi("bt-"+array_num).innerHTML=data_duration(debi("mov-"+array_num).duration)+" s"; 
+							debi("bt-"+array_num).innerHTML=data_duration(debi("mov-"+array_num).duration); 
 							array_num=-1;
 						});
 					}	
 				}
 				else{
-					open("movie.html","Display Window",window_options);
-                    window.focus();
+					//open("movie.html","Display Window",window_options);
+                    //window.focus();
 				}
 				debi("b-"+array_num).style.backgroundColor="rgba("+button_array[array_num].color+")";
 				debi("bnd-"+array_num).style.backgroundColor="";
@@ -308,7 +299,6 @@ document.addEventListener('click', (e)=>{
 			}
 		}
 	}
-//}
 });
 
 document.onmouseover=mouse_over;
@@ -336,35 +326,36 @@ function drag_over(e){
 document.ondrop=drop;
 function drop(e){
 	if(e.target.id.indexOf("bld-")>=0){
-        console.log("drop "+e.target.id);
+        //console.log("drop "+e.target.id);
 		file_id=e.target.id;
 		let drop_func=()=>{
 			const drop_files = e.dataTransfer.files;
-			debi("bdn-"+file_id.split("-")[1]).innerHTML=drop_files[0].name;
-			button_array[Number(file_id.split("-")[1])].name=drop_files[0].name;
-			let create=URL.createObjectURL(drop_files[0]);// faster than readAsDataURL()
-			//let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
-			//button_array[Number(file_id.split("-")[1])].data= create; 
-			button_array[Number(file_id.split("-")[1])].data= drop_files[0].type; 
 			if(drop_files[0].type.indexOf("audio")>=0){
-				debi("movie-"+file_id.split("-")[1]).innerHTML='<video id="mov-'+file_id.split("-")[1]+'" hieght="0px" width="0px"></video>';
+				debi("bdn-"+file_id.split("-")[1]).innerHTML=drop_files[0].name;
+				button_array[Number(file_id.split("-")[1])].name=drop_files[0].name;
+				button_array[Number(file_id.split("-")[1])].data= drop_files[0].type; 
+				let create=URL.createObjectURL(drop_files[0]);// faster than readAsDataURL()
+				//let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
+				//button_array[Number(file_id.split("-")[1])].data= create; 
+				debi("movie-"+file_id.split("-")[1]).innerHTML='<video id="mov-'+file_id.split("-")[1]+'" height="0px" width="0px"></video>';
 				debi("mov-"+file_id.split("-")[1]).src=create;
 				button_array[Number(file_id.split("-")[1])].url=create;
 				debi("b-"+file_id.split("-")[1]).style.backgroundColor="rgba("+button_array[file_id.split("-")[1]].color+")";
 				debi("mov-"+file_id.split("-")[1]).addEventListener("loadedmetadata", ()=>{
-					debi("bt-"+file_id.split("-")[1]).innerHTML=data_duration(debi("mov-"+file_id.split("-")[1]).duration)+" s"; 
+					debi("bt-"+file_id.split("-")[1]).innerHTML=data_duration(debi("mov-"+file_id.split("-")[1]).duration); 
 				});
+			}
+			else{
+				alert("Sorry no sound data");
 			}
 		}
         e.stopPropagation();
         e.preventDefault();
 		if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
-			console.log('movie==""');
 			drop_func();
 		}
 		else{
 			if(debi("mov-"+e.target.id.split("-")[1]).paused){
-				console.log("mov.paused");
 				drop_func();
 			}
 		}
@@ -378,14 +369,12 @@ function select_data(){
 var file_id="";
 document.oncontextmenu =(e)=>{
     if(e.target.id){
-        console.log(e.target.id);
+        //console.log(e.target.id);
         if(e.target.id.indexOf("bld-")>=0){
 			file_id=e.target.id;
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
-                //console.log("movie be");
-                debi("selected_data").click();
-                return false;//
-            }
+				debi("selected_data").click();
+			}
             else{
                 if(debi("mov-"+e.target.id.split("-")[1]).paused){
                     let confirm_line='<div class="confirm_lay_div">';
@@ -437,20 +426,24 @@ function data_duration(num){
 
 function link_data(){
     //console.log("link_data()");
-    debi("bdn-"+file_id.split("-")[1]).innerHTML=debi("selected_data").files[0].name;
-    button_array[Number(file_id.split("-")[1])].name=debi("selected_data").files[0].name;
-    let create=URL.createObjectURL(debi("selected_data").files[0]);//廃止予定しかしreadAsDataURL()より速い
-	//let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
-	//button_array[Number(file_id.split("-")[1])].data= create; 
-	button_array[Number(file_id.split("-")[1])].data= debi("selected_data").files[0].type; 
-	if(debi("selected_data").files[0].type.indexOf("audio")>=0){
-		debi("movie-"+file_id.split("-")[1]).innerHTML='<video id="mov-'+file_id.split("-")[1]+'" hieght="0px" width="0px"></video>';
+	if(Number(debi("selected_data").files[0].type.indexOf("audio"))>=0){
+		//console.log(debi("selected_data").files[0].type.indexOf("audio"));
+    	debi("bdn-"+file_id.split("-")[1]).innerHTML=debi("selected_data").files[0].name;
+    	button_array[Number(file_id.split("-")[1])].name=debi("selected_data").files[0].name;
+    	let create=URL.createObjectURL(debi("selected_data").files[0]);// faster than readAsDataURL()
+		//let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
+		//button_array[Number(file_id.split("-")[1])].data= create; 
+		button_array[Number(file_id.split("-")[1])].data= debi("selected_data").files[0].type;
+		debi("movie-"+file_id.split("-")[1]).innerHTML='<video id="mov-'+file_id.split("-")[1]+'" height="0px" width="0px"></video>';
 		debi("mov-"+file_id.split("-")[1]).src=create;
 		button_array[Number(file_id.split("-")[1])].url=create;
 		debi("mov-"+file_id.split("-")[1]).addEventListener("loadedmetadata", ()=>{
-			debi("bt-"+file_id.split("-")[1]).innerHTML=data_duration(debi("mov-"+file_id.split("-")[1]).duration)+" s"; 
+			debi("bt-"+file_id.split("-")[1]).innerHTML=data_duration(debi("mov-"+file_id.split("-")[1]).duration); 
 		});
 		debi("b-"+file_id.split("-")[1]).style.backgroundColor="rgba("+button_array[file_id.split("-")[1]].color+")";
+	}
+	else{
+		alert("Sorry no sound data");
 	}
 	debi("confirm_background").style.display='none';
 	debi("confirm_lay").style.display='none';
