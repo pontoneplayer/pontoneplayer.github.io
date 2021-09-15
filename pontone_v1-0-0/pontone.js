@@ -442,7 +442,7 @@ function link_data(){
 		});
 		debi("b-"+file_id.split("-")[1]).style.backgroundColor="rgba("+button_array[file_id.split("-")[1]].color+")";
         debi("selected_data").value="";
-        //console.log("selected_data.value="+debi("selected_data").value);
+        console.log("selected_data.value="+debi("selected_data").value);
 	}
 	else{
 		alert("Sorry no sound data");
