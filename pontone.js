@@ -1,3 +1,5 @@
+/*PonTONE v1.0.1*/
+
 document.onkeydown=key_down; //ページ
 function key_down(event){//
     if(event.key==" " || event.key=="　"){//
@@ -145,8 +147,8 @@ function make_buttons(){
                 buttons_line+='</span>';
             buttons_line+='</div>';
             buttons_line+='<div id="bdd-'+i+'" class="bd_div">';
-                buttons_line+='<span id="bdn-'+i+'" class="d_name">';
-                buttons_line+='</span>';
+                buttons_line+='<p><span id="bdn-'+i+'" class="d_name">';//<p></p> v1.0.1 fixed
+                buttons_line+='</span></p>';
             buttons_line+='</div>';        
             buttons_line+='<div id="bld-'+i+'" class="b_lay">';
             buttons_line+='</div>';
