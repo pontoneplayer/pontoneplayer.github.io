@@ -1,5 +1,4 @@
 @charset "UTF-8";
-/*PonTONE v1.0.2*/
 /* CSS Document */
 body{
     /*display:flex;
@@ -73,10 +72,8 @@ body{
     /*justify-content: flex-end;*/
 	text-align: right;
 }
-
 .d_name{font-size: 10pt; margin-right: 2px;}
-
-p{/*v.1.0.1 fixed*/
+p{
 	margin-top : 5px ;
 	line-height: 15px;
 }
