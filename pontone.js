@@ -1,3 +1,5 @@
+/*PonTONE v1.0.2*/
+
 document.onkeydown=key_down; //ページ
 function key_down(event){//
     if(event.key==" " || event.key=="　"){//
@@ -52,19 +54,21 @@ function myButton(){//button object
 var button_array=[];
 var sub_win;
 var window_options = "menubar=no,location=yes,resizable=yes,scrollbars=no,status=no";
+var db_cnt=24;//default button count //fixed v1.0.2
 
 function make_buttons(){
-    for(let i=0;i<24;i++){
+    for(let i=0;i<db_cnt;i++){
 		button_array.push(new myButton());
 		let high_limit=225;
 		let low_limit=45;
+		let step=(high_limit-low_limit)/(db_cnt/6)//fixed v1.0.2
 		if(i!=0){
 			let b1_color=button_array[i-1].color;
 			let target_color="";
 			if(button_array[i-2]==undefined){
 				let r_n=b1_color.split(",")[0];
 				let g_n=b1_color.split(",")[1];
-				let b_n=Number(b1_color.split(",")[2])-60;
+				let b_n=Number(b1_color.split(",")[2])-step;//fixed v1.0.2
 				target_color=r_n+','+g_n+','+b_n+','+1.00;
 			}
 			else{
@@ -78,55 +82,55 @@ function make_buttons(){
 
 				if(g1_n==high_limit && r2_n-r1_n<0){
 					if(r1_n!=g1_n){
-						target_color=(r1_n+60)+','+g1_n+','+b1_n+','+1.00;
+						target_color=(r1_n+step)+','+g1_n+','+b1_n+','+1.00;
 					}
 					else{
-						target_color=r1_n+','+(g1_n-60)+','+b1_n+','+1.00;
+						target_color=r1_n+','+(g1_n-step)+','+b1_n+','+1.00;
 					}
 				}
 				else if(g1_n==low_limit && r2_n-r1_n>0){
 					if(r1_n!=g1_n){
-						target_color=(r1_n-60)+','+g1_n+','+b1_n+','+1.00;
+						target_color=(r1_n-step)+','+g1_n+','+b1_n+','+1.00;
 					}
 					else{
-						target_color=r1_n+','+(g1_n+60)+','+b1_n+','+1.00;
+						target_color=r1_n+','+(g1_n+step)+','+b1_n+','+1.00;
 					}
 				}
 				else if(b1_n==low_limit && g2_n-g1_n>0){
 					if(g1_n!=b1_n){
-						target_color=r1_n+','+(g1_n-60)+','+b1_n+','+1.00;
+						target_color=r1_n+','+(g1_n-step)+','+b1_n+','+1.00;
 					}
 					else{
-						target_color=r1_n+','+g1_n+','+(b1_n+60)+','+1.00;
+						target_color=r1_n+','+g1_n+','+(b1_n+step)+','+1.00;
 					}
 				}
 				else if(b1_n==high_limit && g2_n-g1_n<0){
 					if(g1_n!=b1_n){
-						target_color=r1_n+','+(g1_n+60)+','+b1_n+','+1.00;
+						target_color=r1_n+','+(g1_n+step)+','+b1_n+','+1.00;
 					}
 					else{
-						target_color=r1_n+','+g1_n+','+(b1_n-60)+','+1.00;
+						target_color=r1_n+','+g1_n+','+(b1_n-step)+','+1.00;
 					}
 				}
 				else if(r1_n==high_limit && b2_n-b1_n<0){
 					if(r1_n!=b1_n){
-						target_color=r1_n+','+g1_n+','+(b1_n+60)+','+1.00;
+						target_color=r1_n+','+g1_n+','+(b1_n+step)+','+1.00;
 					}
 					else{
-						target_color=(r1_n-60)+','+g1_n+','+b1_n+','+1.00;
+						target_color=(r1_n-step)+','+g1_n+','+b1_n+','+1.00;
 					}
 				}
 				else if(r1_n==low_limit && b2_n-b1_n>0){
 					if(r1_n!=b1_n){
-						target_color=r1_n+','+g1_n+','+(b1_n-60)+','+1.00;
+						target_color=r1_n+','+g1_n+','+(b1_n-step)+','+1.00;
 					}
 					else{
-						target_color=(r1_n+60)+','+g1_n+','+b1_n+','+1.00;
+						target_color=(r1_n+step)+','+g1_n+','+b1_n+','+1.00;
 					}
 				}
 			}
 			button_array[i].color=target_color;
-			//console.log("button_array["+i+"].color="+button_array[i].color);
+			console.log("button_array["+i+"].color="+button_array[i].color);
 		}
 		else{
 			//console.log("i="+i);
@@ -145,8 +149,8 @@ function make_buttons(){
                 buttons_line+='</span>';
             buttons_line+='</div>';
             buttons_line+='<div id="bdd-'+i+'" class="bd_div">';
-                buttons_line+='<span id="bdn-'+i+'" class="d_name">';
-                buttons_line+='</span>';
+                buttons_line+='<p><span id="bdn-'+i+'" class="d_name">';//<p></p> v1.0.1 fixed
+                buttons_line+='</span></p>';
             buttons_line+='</div>';        
             buttons_line+='<div id="bld-'+i+'" class="b_lay">';
             buttons_line+='</div>';
