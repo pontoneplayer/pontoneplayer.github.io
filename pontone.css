@@ -1,24 +1,36 @@
 @charset "UTF-8";
-/*PonTONE v1.0.3*/
+/*PonTONE v1.1.0*/
 /* CSS Document */
 body{
-    /*display:flex;
-    align-items: center;
-    justify-content: center;*/
- 	background-color:rgba(50,50,50,1.00);    
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    background-color:rgba(50,50,50,1.00);
+	/*color:white;*/
 }
-.body_div{
-    display: flex;          /* Flexboxを指定 */
-    justify-content: space-around;  /*水平方向の中央寄せ */
-    align-items: center;  /* 垂直方向の中央寄せ */
-	position:fixed;
+
+#main{
+	position:fixed;/*for body*/
 	top:0;
 	left:0;
 	width:100%;
 	height:100%;
+
+    display: flex;          /* Flexboxを指定 */
+    justify-content: center;  /*水平方向の中央寄せ */
+    align-items: center;  /* 垂直方向の中央寄せ */
     /*background-color:rgba(255,255,255,1.00);  */
 }
+#content{
+}
+#view{
+    /*display: flex;
+    flex-direction: column;
+    align-items: center;  /* 垂直方向の中央寄せ */
+}
 #button_background{
+    position: relative;
     display:flex;
 	flex-direction:row;
   	flex-wrap:wrap;
@@ -28,8 +40,49 @@ body{
 	/*height:300px;*/
 	border-radius: 10px;
 	/*color: white;*/
-	background-color:rgba(255,255,255,1.00);    
+	background-color:rgba(240,248,255,1.00);    
 }
+
+#tytle_var{
+    display: flex; /* Flexboxを指定 */
+    justify-content:flex-end;
+	align-items: baseline;
+    width:inherit;
+    /*height:0px;*/
+}
+#tytle{
+    color:rgba(240,248,255,1.00); 
+    font-weight: bold; 
+    text-shadow:1px 1px 1px black,0px -0px 0px black,-0px 0px 1px black,-0px -0px 0px black;
+}
+#l_P{
+    letter-spacing: -2px;
+    font-size: 14.5pt ;
+    transform: scale(1, 1.25);
+    display: inline-block;
+    vertical-align:2.5px; 
+}
+#l_o{
+    font-size: 14pt ;
+    letter-spacing: -0.5px;
+}
+#l_n{
+    font-size: 14pt ;
+    letter-spacing: -3px;
+}
+#l_T{
+    letter-spacing: -3.0px;
+    font-size: 14.5pt ;
+    transform: scale(1, 1.25);
+    display: inline-block;
+    vertical-align: 2.5px; 
+}
+#l_ONE{
+    font-size: 14pt ;
+    letter-spacing: -1.5px;
+}
+#version{color:aliceblue; font-size: 12px; font-kerning: normal;}    
+
 .color-b0{
     background-color:rgba(255,255,255,0.00);
 }
@@ -42,13 +95,14 @@ body{
     position: relative;
  	width:100px;
 	height:100px;
-    border: 2px solid black;
-	border-radius: 5px;
-	/*background-color:rgba(255,255,255,1.00)*/
+    border: 2px solid rgba(127,127,127,1.00);
+    border-radius: 5px;
+	background-color:rgba(170,170,170,1.00);
 }
 
 .bn_div{
     display: flex;
+    flex-direction: column;
     position: absolute;
     left:0;
     top:0;
@@ -63,7 +117,7 @@ body{
 
 .mv_div{
 	z-index:1;
-    display: block;
+    display: none;
     position: absolute;
     left:0;
     top:0;
@@ -75,6 +129,7 @@ body{
     display: flex;
     justify-content:flex-end;
     align-items: baseline; 
+ 	border-radius: 5px 5px 0px 0px;
 }
 .b_time_ing{font-size: 10pt;}
 .b_time{font-size: 10pt; margin-right: 2px;}
@@ -95,18 +150,73 @@ p{/*v.1.0.1 fixed*/
 
 .b_lay{
 	z-index:3;
- 	display:block;
     position: absolute;
     left:0;
     top:0;
  	width:100px;
 	height:100px;
+ 	display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
  	border-radius: 5px;
 	background-color:rgba(255,255,255,0.00)
 }
 
+#tool_var{
+	z-index:5;
+    position: absolute;
+    display:none;
+	flex-direction:row;
+	justify-content: space-around;
+	align-items: center;
+ 	width:380px;
+    cursor:move;
+	/*height:100px;*/
+    border: 2px solid rgba(127,127,127,1.00);
+	border-radius: 10px;
+	/*color: white;*/
+	background-color:rgba(255,255,255,0.30);    
+}
+#f_b_div{
+    display:flex;
+    cursor:pointer;
+    align-items: center;
+    justify-content:center;
+    margin-top: -0px;
+    width:30px;
+    height:30px;
+    border: 1px solid rgba(127,127,127,1.00);
+	border-radius: 3px;
+	background-color:rgba(170,170,170,1.00);
+    font-size:14px;
+    font-weight:bold;
+    color:rgba(240,248,255,1.00);
+    
+}
+#fader{
+    height: 14px;
+    width: 120px;
+}
+#close_div{
+    display:flex;
+    cursor:pointer;
+    justify-content:flex-end;
+    margin-top: -8px;
+    /*width:inherit;*/
+}
+#close_x{
+ 	color: white;
+    font-size:32px;
+}
+#fader_div{
+    display: flex;
+    align-items: baseline;
+}
+.tool_font{color:white; font-size: 12pt;font-weight: bold}
+
 .confirm_background_style{
-	z-index:4;
+	z-index:6;
     display: none;
     justify-content: center;
     align-items: center;
@@ -119,7 +229,6 @@ p{/*v.1.0.1 fixed*/
 }
 
 .confirm_lay_style{
-	z-index:5;
 	display:none;
 	height:auto;
 	width:auto;
@@ -158,3 +267,9 @@ p{/*v.1.0.1 fixed*/
 .size_12 { font-size: 12pt ;}
 .size_13 { font-size: 13pt ;}
 .size_14 { font-size: 14pt ;}
+.size_36 { font-size: 36pt ;}
+.size_39 {
+    font-size: 38.77pt ;
+    transform: scale(1, 1.25);
+     display: inline-block;
+}
