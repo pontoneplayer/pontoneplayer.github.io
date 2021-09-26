@@ -1,100 +1,4 @@
-/*PonTONE v1.1.0*/
-function debi(id){
-	return document.getElementById(id);
-}
-
-var flick;    
-var fade_on=0;
-function f_b_click(){
-    let flick_on=0
-    if(fade_on==0){
-        flick=setInterval(()=>{
-            fade_on=1;
-            if(flick_on==0){//
-                debi("f_b_div").style.backgroundColor="rgba(255,250,147,1.00)";
-                flick_on=1;
-            }
-            else{
-                debi("f_b_div").style.backgroundColor="rgba(200,200,200,1.00)";
-                flick_on=0;
-            }   
-        },400);
-    }
-    else{
-        clearInterval(flick);
-        console.log("clear flick-ID="+flick);
-        fade_on=0;
-        debi("f_b_div").style.backgroundColor="rgba(170,170,170,1.00)";
-    }
-}
-
-var x=0;
-var y=0;
-let drag_ele;
-function drag_move(e){
-    //console.log("mousemove= "+e.target.id);
-    drag_ele.style.top = e.pageY - y + "px";
-    drag_ele.style.left = e.pageX - x + "px";
-    drag_ele.addEventListener("mouseup", drop_mup, false);
-    document.addEventListener("mouseleave", drop_mup, false);
-    return false;
-}
-function drop_mup(e){
-    document.removeEventListener("mousemove", drag_move, false);
-    drag_ele.removeEventListener("mouseup", drop_mup, false);
-}
-document.addEventListener("mousedown", (e)=>{//fader_div
-    //console.log("e.target.id="+e.target.id);
-	if(e.target.id=="tool_var" || e.target.id=="fader_div" || e.target.id=="FT" || e.target.id=="fader_qy"){
-        drag_ele = debi("tool_var");
-        x = e.pageX - drag_ele.offsetLeft;
-        y = e.pageY - drag_ele.offsetTop;
-        console.log("x="+x+" y="+y);
-        document.addEventListener("mousemove", drag_move, false);
-    }
-    return false;
-});
-function slide_fr(){
-    let qy_time;
-    if(debi("fader").value.indexOf(".")<0){
-        qy_time=debi("fader").value+".0";
-    }
-    else{
-        qy_time=debi("fader").value;
-        
-    }
-	debi("fader_qy").innerHTML=qy_time;
-	//console.log(qy_time);
-}
-function close_tv(){
-    debi("tool_var").style.display="none";
-    if(fade_on==1){
-        clearInterval(flick);
-        console.log("clear flick-ID="+flick);
-        fade_on=0;
-        debi("f_b_div").style.backgroundColor="rgba(170,170,170,1.00)";
-    }
-}
-document.addEventListener('dblclick', (e)=>{
-	console.log("dblclickclick= "+e.target.id);
-	if(e.target.id){
-		if(e.target.id=="main" || e.target.id=="tytle_var"){
-            if(debi("tool_var").style.display=="none"){
-                debi("tool_var").style.display="flex";
-            }
-            else{
-                debi("tool_var").style.display="none";
-                if(fade_on==1){
-                    clearInterval(flick);
-                    console.log("clear flick-ID="+flick);
-                    fade_on=0;
-                    debi("f_b_div").style.backgroundColor="rgba(170,170,170,1.00)";
-                }
-            }
-        }
-    }
-    return false;
-});
+/*PonTONE v1.0.3*/
 
 document.onkeydown=key_down; //ページ
 function key_down(event){//
@@ -102,14 +6,34 @@ function key_down(event){//
 		for(let i=0;i<button_array.length;i++){
 			if(button_array[i].on==1){
 				if(button_array[i].data.indexOf("audio")>=0){
-                    if(button_array[i].fading==0){
-                        stop_playing(i);
-                    }
+					debi("mov-"+i).pause();
+					debi("mov-"+i).currentTime = 0;
+					clearInterval(button_array[i].timer);//function name
+					console.log("clear setInterval-ID="+button_array[i].timer);
+					{//delete clearInterval-ID zombie on console
+						debi("movie-"+i).innerHTML="";
+						debi("movie-"+i).innerHTML='<video id="mov-'+i+'" height="0px" width="0px"></video>';
+						debi("mov-"+i).src=button_array[i].url;
+						//console.log(debi("mov-"+i).src);
+						debi("mov-"+i).addEventListener("loadedmetadata", ()=>{
+							debi("bt-"+i).innerHTML=data_duration(debi("mov-"+i).duration); 
+						});
+					}
 				}
 				else{
 					//open("movie.html","Display Window",window_options);
 					//window.focus();
 				}
+				debi("b-"+i).style.backgroundColor="rgba("+button_array[i].color+")";
+				//debi("bnd-"+i).style.backgroundColor="";
+                debi("bnn-"+i).style.color=trans_color(button_array[i].color,-75,1.00);
+                debi("btd-"+i).style.backgroundColor=trans_color(button_array[i].color,-45,0.30);
+                debi("bti-"+i).innerHTML="";
+                //debi("bt-"+i).innerHTML=debi("mov-"+i).duration.toFixed(1);
+				//debi("bt-"+i).style.color="white";
+				debi("bdn-"+i).style.color="white";
+				//debi("bld-"+i).style.backgroundColor="rgba(255,255,255,0.00)";
+				button_array[i].on=0;
 				break;
 			}
 		}
@@ -117,10 +41,13 @@ function key_down(event){//
 	}
 }
 
+function debi(id){
+	return document.getElementById(id);
+}
+
 function myButton(){//button object
 	this.color="45,225,225,1.00";
     this.on=0;
-    this.fading=0;
 	this.data=""
     this.url="";
     this.timer;
@@ -132,7 +59,6 @@ var window_options = "menubar=no,location=yes,resizable=yes,scrollbars=no,status
 var db_cnt=24;//default button count //fixed v1.0.2
 
 function make_buttons(){
-	debi("fader_qy").value=debi("fader").value=0;
     for(let i=0;i<db_cnt;i++){
 		button_array.push(new myButton());
 		let high_limit=225;
@@ -243,7 +169,7 @@ function make_buttons(){
 		debi("bti-"+i).style.color="white";
 		debi("bt-"+i).style.color="white";
 		debi("bdn-"+i).style.color="white";
-		debi("bdn-"+i).style.fontWeight="bold";		
+		debi("b-"+i).style.backgroundColor="rgba("+127+","+127+","+127+","+0.80+")";
         let target_height=(Math.ceil(button_array.length/6)*100+100)+"px";
         debi("button_background").style.height=target_height;
     }
@@ -270,37 +196,31 @@ function t_remain(){
 	else{
 		if((remaining-(60*Math.floor(remaining/60))).toFixed(1)<10){
 			second="0"+(remaining-(60*Math.floor(remaining/60))).toFixed(1);
-			remaining=Math.floor(remaining/60)+'"'+second;
+			remaining=Math.floor(remaining/60)+"'"+second;
 		}
 		else{
-			remaining=Math.floor(remaining/60)+'"'+(remaining-(60*Math.floor(remaining/60))).toFixed(1);
+			remaining=Math.floor(remaining/60)+"'"+(remaining-(60*Math.floor(remaining/60))).toFixed(1);
 		}
 	}
     debi("bti-"+array_num).innerHTML=remaining+" /";
 }
 
-function t_ing(num){
-    let running=debi("mov-"+num).currentTime;
-    let second;
-    if(Math.floor(running/60)==0){
-        running=running.toFixed(1);
-    }
-    else{
-        if((running-(60*Math.floor(running/60))).toFixed(1)<10){
-            second="0"+(running-(60*Math.floor(running/60))).toFixed(1);
-            running=Math.floor(running/60)+'"'+second;
-        }
-        else{
-            running=Math.floor(running/60)+'"'+(running-(60*Math.floor(running/60))).toFixed(1);
-        }
-    }
-    debi("bti-"+num).innerHTML=running+"/";
-    if(button_array[num].fading==1){
-        sound_fade_out(num);
-    }
-    if(button_array[num].fading==2){
-        sound_fade_in(num);
-    }
+function t_ing(){
+	let running=debi("mov-"+array_num).currentTime;
+	let second;
+	if(Math.floor(running/60)==0){
+		running=running.toFixed(1);
+	}
+	else{
+		if((running-(60*Math.floor(running/60))).toFixed(1)<10){
+			second="0"+(running-(60*Math.floor(running/60))).toFixed(1);
+			running=Math.floor(running/60)+"'"+second;
+		}
+		else{
+			running=Math.floor(running/60)+"'"+(running-(60*Math.floor(running/60))).toFixed(1);
+		}
+	}
+    debi("bti-"+array_num).innerHTML=running+" /";
 }
 
 function data_duration(num){
@@ -312,221 +232,121 @@ function data_duration(num){
 	else{
 		if((num-(60*Math.floor(num/60))).toFixed(1)<10){
 			second="0"+(num-(60*Math.floor(num/60))).toFixed(1);
-			remaining=Math.floor(num/60)+'"'+second;
+			remaining=Math.floor(num/60)+"'"+second;
 		}
 		else{
-			remaining=Math.floor(num/60)+'"'+(num-(60*Math.floor(num/60))).toFixed(1);
+			remaining=Math.floor(num/60)+"'"+(num-(60*Math.floor(num/60))).toFixed(1);
 		}
 	}
 	return remaining;
 }
 
-var fo_time=0;
-function stop_playing(num){
-    if(fade_on==1 && debi("fader").value!=0){
-        fo_time=debi("fader").value;
-        //console.log("fading stop");
-        button_array[num].fading=1;
-        debi("bld-"+num).style.backgroundColor=trans_color(button_array[num].color,-75,0.30);
-        //sound_fading(num)
-    }
-    else{
-        //console.log("normal stop");
-        to_end(num);
-    }
-}   
-
-function to_end(num){
-    //console.log("to_end num="+num);
-    clearInterval(button_array[num].timer)//function name
-    console.log("clear button_array[num].timer-ID="+button_array[num].timer);
-    debi("mov-"+num).pause();
-    debi("mov-"+num).currentTime = 0;
-    debi("mov-"+num).volume = 1;
-    if(fade_on==1){
-        clearInterval(flick);
-        console.log("clear flick-ID="+flick);
-        fade_on=0;
-        debi("f_b_div").style.backgroundColor="rgba(170,170,170,1.00)";
-    }
-    //if(waiting_num>=0){
-        //start_to_play(waiting_num);
-    //}
-    /*{//delete clearInterval-ID zombie on console
-        debi("movie-"+num).innerHTML='<video id="mov-'+num+'" height="0px" width="0px"></video>';
-        debi("mov-"+num).src=button_array[num].url;
-        debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
-            debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration); 
-            //num=-1;
-        });
-    }*/
-    debi("b-"+num).style.backgroundColor="rgba("+button_array[num].color+")";
-    let b_color=trans_color(button_array[num].color,-75,1.00);
-    debi("b-"+num).style.borderTop="0px solid gray";
-    debi("b-"+num).style.borderLeft="0px solid gray";
-    debi("b-"+num).style.borderBottom="4px solid "+b_color;
-    debi("b-"+num).style.borderRight="4px solid "+b_color;
-    debi("bnd-"+num).style.backgroundColor="";
-    debi("bnn-"+num).style.color=trans_color(button_array[num].color,-75,1.00);
-    debi("btd-"+num).style.fontWeight="normal";
-    debi("bti-"+num).innerHTML="";
-    debi("bdn-"+num).style.color="white";
-    debi("bld-"+num).style.backgroundColor=trans_color(button_array[num].color,-75,0.00);
-    debi("bld-"+num).innerHTML="";
-    button_array[num].on=0;
-}
-
-var out_time=0;
-function sound_fade_out(num){
-    out_time+=0.1;
-    if(fo_time<=out_time){
-        debi("mov-"+num).volume=0;
-         button_array[num].fading=0;
-        debi("bld-"+num).innerHTML="";
-        out_time=0;
-        to_end(num); 
-    }
-    else if(out_time<fo_time/2){
-        debi("mov-"+num).volume=-(1/(fo_time*2))*out_time+1;
-        //console.log("debi(mov-+num).volume="+debi("mov-"+num).volume);
-        if(out_time.toFixed(1)*10%2==1){
-             if(debi("bld-"+num).innerHTML==""){
-                debi("bld-"+num).innerHTML='<span style="font-size:20px; color:rgba(255,255,255,1.00);">Fading</span><span style="font-size:20px; color:rgba(255,255,255,1.00);">out</span>';
-            }
-            else{
-                debi("bld-"+num).innerHTML="";
-            }
-        }
-    }
-    else{
-        debi("mov-"+num).volume=-(1/fo_time)*(3/2)*out_time+1.5;
-        //console.log("debi(mov-+num).volume="+debi("mov-"+num).volume);
-        if(out_time.toFixed(1)*10%2==1){
-            if(debi("bld-"+num).innerHTML==""){
-                debi("bld-"+num).innerHTML='<span style="font-size:20px; color:rgba(255,255,255,1.00);">Fading</span><span style="font-size:20px; color:rgba(255,255,255,1.00);">out</span>';
-            }
-            else{
-                debi("bld-"+num).innerHTML="";
-            }
-        }
-    }
-}
-
-var fi_time=0;
-function start_to_play(num,fade){
-    debi("mov-"+num).addEventListener("ended", ()=>{//num=-1;
-        //console.log("ended in !");
-        to_end(num);
-    });
-    if(fade==1 && debi("fader").value!=0){//引数を受けている not fade_on
-        fi_time=debi("fader").value;
-        button_array[num].fading=2;
-        debi("bld-"+num).style.backgroundColor=trans_color(button_array[num].color,-75,0.30);
-    }
-    if(button_array[num].data.indexOf("audio")>=0){
-        debi("mov-"+num).play();
-        button_array[num].on=1;
-    }
-    else{
-        //open("movie.html","Display Window",window_options);
-    }
-    button_array[num].timer=setInterval(()=>{t_ing(num)},100);
-    debi("b-"+num).style.backgroundColor=trans_color(button_array[num].color,75,0.30);
-    let b_color=trans_color(button_array[num].color,-75,1.00);
-    debi("b-"+num).style.borderTop="2px solid "+b_color;
-    debi("b-"+num).style.borderLeft="2px solid "+b_color;
-    debi("b-"+num).style.borderBottom="2px solid "+b_color;
-    debi("b-"+num).style.borderRight="2px solid "+b_color;
-    debi("bnn-"+num).style.color=trans_color(button_array[num].color,0,0.50);
-    debi("btd-"+num).style.backgroundColor=trans_color(button_array[num].color,-100,0.30);
-    //debi("btd-"+num).style.fontWeight="bold";
-    debi("bdn-"+num).style.color=trans_color(button_array[num].color,-30,1.00);
-    waiting_num=-1;
-}   
-
-var in_time=0;
-function sound_fade_in(num){
-    debi("mov-"+num).volume=0;
-    in_time+=0.1;
-    if(fi_time<=in_time){
-        debi("bld-"+num).style.backgroundColor=trans_color(button_array[num].color,-75,0.00);
-        debi("mov-"+num).volume=1;
-        button_array[num].fading=0;
-        debi("bld-"+num).innerHTML="";
-        in_time=0;
-    }
-    else if(in_time<fi_time/2){
-        debi("mov-"+num).volume=(1/fo_time)*(3/2)*out_time;
-        //console.log("debi(mov-+num).volume="+debi("mov-"+num).volume);
-        if(in_time.toFixed(1)*10%2==1){
-            if(debi("bld-"+num).innerHTML==""){
-                debi("bld-"+num).innerHTML='<span style="font-size:20px; color:rgba(255,255,255,1.00);">Fading</span><span style="font-size:20px; color:rgba(255,255,255,1.00);">in</span>';
-            }
-            else{
-                debi("bld-"+num).innerHTML="";
-            }
-        }
-    }
-    else{
-        debi("mov-"+num).volume=(1/(fo_time*2))*out_time+0.5;
-        //console.log("debi(mov-+num).volume="+debi("mov-"+num).volume);
-        if(in_time.toFixed(1)*10%2==1){
-            if(debi("bld-"+num).innerHTML==""){
-                debi("bld-"+num).innerHTML='<span style="font-size:20px; color:rgba(255,255,255,1.00);">Fading</span><span style="font-size:20px; color:rgba(255,255,255,1.00);">in</span>';
-            }
-            else{
-                debi("bld-"+num).innerHTML="";
-            }
-        }
-    }
-}
-
-var waiting_num=-1;
 document.addEventListener('click', (e)=>{
 	//console.log("click= "+e.target.id);
 	if(e.target.id){
 		if(e.target.id.indexOf("bld-")>=0){
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML!=""){
                 if(debi("mov-"+e.target.id.split("-")[1]).paused){
-                    waiting_num=Number(e.target.id.split("-")[1]);
-                    let on_check=0;
                     for(let i=0;i<button_array.length;i++){
                         if(button_array[i].on==1){
                             if(button_array[i].data.indexOf("audio")>=0){
-                                on_check=1;
-                                if(button_array[i].fading==0){
-                                    stop_playing(i);                            
-                                    start_to_play(waiting_num,1);
-                                }
-                                else{
-                                    console.log("Fadimg Now !")
+                                debi("mov-"+i).pause();
+                                debi("mov-"+i).currentTime = 0;
+                                clearInterval(button_array[i].timer);//function name
+                                console.log("clear setInterval-ID="+button_array[i].timer);
+                                {//delete clearInterval-ID zombie on console
+                                    debi("movie-"+i).innerHTML="";
+                                    debi("movie-"+i).innerHTML='<video id="mov-'+i+'" height="0px" width="0px"></video>';
+                                    debi("mov-"+i).src=button_array[i].url;
+                                    debi("mov-"+i).addEventListener("loadedmetadata", ()=>{
+                                        debi("bt-"+i).innerHTML=data_duration(debi("mov-"+i).duration); 
+                                    });
                                 }
                             }
                             else{
                                 //open("movie.html","Display Window",window_options);
                                 //window.focus();
                             }
+                            debi("b-"+i).style.backgroundColor="rgba("+button_array[i].color+")";
+                            //debi("bnd-"+i).style.backgroundColor="";
+                            debi("bnn-"+i).style.color=trans_color(button_array[i].color,-75,1.00);
+                            debi("btd-"+i).style.backgroundColor=trans_color(button_array[i].color,-45,0.30);
+                            debi("bti-"+i).innerHTML="";
+                            //debi("bt-"+i).style.color="white";
+                            debi("bdn-"+i).style.color="white";
+                            //debi("bld-"+i).style.backgroundColor="rgba(255,255,255,0.00)";
+                            button_array[i].on=0;
                             break;
                         }
                     }
-                    if(on_check==0){    
-                        start_to_play(waiting_num,0);
+                    array_num=Number(e.target.id.split("-")[1]);
+                    debi("mov-"+array_num).addEventListener("ended", ()=>{
+                        //console.log("ended in !");
+                        clearInterval(button_array[array_num].timer);//function name
+                        console.log("clear setInterval-ID="+button_array[array_num].timer);
+                        {//delete clearInterval-ID zombie on console
+                            debi("movie-"+array_num).innerHTML="";
+                            debi("movie-"+array_num).innerHTML='<video id="mov-'+array_num+'" height="0px" width="0px"></video>';
+                            debi("mov-"+array_num).src=button_array[array_num].url;
+                            debi("mov-"+array_num).addEventListener("loadedmetadata", ()=>{
+                                debi("bt-"+array_num).innerHTML=data_duration(debi("mov-"+array_num).duration); 
+                                array_num=-1;
+                            });
+                        }
+                        debi("b-"+array_num).style.backgroundColor="rgba("+button_array[array_num].color+")";
+                        //debi("bnd-"+array_num).style.backgroundColor="";
+                        debi("bnn-"+array_num).style.color=trans_color(button_array[array_num].color,-75,1.00);
+                        debi("btd-"+array_num).style.backgroundColor=trans_color(button_array[array_num].color,-45,0.30);
+                        debi("bti-"+array_num).innerHTML="";
+                        //debi("bt-"+array_num).style.color="white";
+                        debi("bdn-"+array_num).style.color="white";
+                        //debi("bld-"+array_num).style.backgroundColor="rgba(255,255,255,0.00)";
+                        button_array[array_num].on=0;
+                    });
+                    if(button_array[array_num].data.indexOf("audio")>=0){
+                        debi("mov-"+array_num).play();
+                        button_array[array_num].on=1;
                     }
+                    else{
+                        //open("movie.html","Display Window",window_options);
+                    }
+                    button_array[array_num].timer=setInterval(t_ing,100);
+                    debi("b-"+array_num).style.backgroundColor=trans_color(button_array[array_num].color,75,0.30);
+                    //debi("bnd-"+array_num).style.backgroundColor="rgba("+button_array[array_num].color+")";
+                    debi("bnn-"+array_num).style.color=trans_color(button_array[array_num].color,0,0.50);
+                    debi("btd-"+array_num).style.backgroundColor=trans_color(button_array[array_num].color,-100,0.30);
+                    //debi("bt-"+array_num).style.color="white";
+                    debi("bdn-"+array_num).style.color=trans_color(button_array[array_num].color,-30,1.00);
+                    //debi("bld-"+array_num).style.backgroundColor="rgba(255,255,255,0.00)";
                 }
                 else{
-					array_num=Number(e.target.id.split("-")[1]);
-					if(button_array[array_num].data.split(",")[0].indexOf("audio")>=0){
-                        if(button_array[array_num].fading==0){
-                            stop_playing(array_num);                            
-                        }
-                        else{
-                            console.log("Fading Now !")
+                    if(button_array[array_num].data.split(",")[0].indexOf("audio")>=0){
+                        debi("mov-"+array_num).pause();
+                        debi("mov-"+array_num).currentTime = 0;
+                        clearInterval(button_array[array_num].timer)//function name
+                        console.log("clear setInterval-ID="+button_array[array_num].timer);
+                        {//delete clearInterval-ID zombie on console
+                            debi("movie-"+array_num).innerHTML="";
+                            debi("movie-"+array_num).innerHTML='<video id="mov-'+array_num+'" height="0px" width="0px"></video>';
+                            debi("mov-"+array_num).src=button_array[array_num].url;
+                            debi("mov-"+array_num).addEventListener("loadedmetadata", ()=>{
+                                debi("bt-"+array_num).innerHTML=data_duration(debi("mov-"+array_num).duration); 
+                                array_num=-1;
+                            });
                         }
                     }
                     else{
                         //open("movie.html","Display Window",window_options);
                         //window.focus();
                     }
+                    debi("b-"+array_num).style.backgroundColor="rgba("+button_array[array_num].color+")";
+                    debi("bnd-"+array_num).style.backgroundColor="";
+                    debi("bnn-"+array_num).style.color=trans_color(button_array[file_id.split("-")[1]].color,-75,1.00);
+                    debi("bti-"+array_num).innerHTML="";
+                    //debi("bt-"+array_num).style.color="white";
+                    debi("bdn-"+array_num).style.color="white";
+                    //debi("bld-"+array_num).style.backgroundColor="rgba(255,255,255,0.00)";
+                    button_array[array_num].on=0;
                 }
             }
             else{
@@ -584,18 +404,13 @@ function drop(e){
 				debi("movie-"+file_id.split("-")[1]).innerHTML='<video id="mov-'+file_id.split("-")[1]+'" height="0px" width="0px"></video>';
 				debi("mov-"+file_id.split("-")[1]).src=create;
 				button_array[Number(file_id.split("-")[1])].url=create;
-				debi("mov-"+file_id.split("-")[1]).addEventListener("loadedmetadata", ()=>{
-					debi("bt-"+file_id.split("-")[1]).innerHTML=data_duration(debi("mov-"+file_id.split("-")[1]).duration); 
-				});
 				debi("b-"+file_id.split("-")[1]).style.backgroundColor="rgba("+button_array[file_id.split("-")[1]].color+")";
-				let b_color=trans_color(button_array[file_id.split("-")[1]].color,-75,1.00);
-				debi("b-"+file_id.split("-")[1]).style.borderTop="0px solid white";
-				debi("b-"+file_id.split("-")[1]).style.borderLeft="0px solid white";
-				debi("b-"+file_id.split("-")[1]).style.borderBottom="4px solid "+b_color;
-				debi("b-"+file_id.split("-")[1]).style.borderRight="4px solid "+b_color;
                 debi("bnn-"+file_id.split("-")[1]).className="b_number_on";
                 debi("bnn-"+file_id.split("-")[1]).style.color=trans_color(button_array[file_id.split("-")[1]].color,-75,1.00);
                 debi("btd-"+file_id.split("-")[1]).style.backgroundColor=trans_color(button_array[file_id.split("-")[1]].color,-45,0.30);
+				debi("mov-"+file_id.split("-")[1]).addEventListener("loadedmetadata", ()=>{
+					debi("bt-"+file_id.split("-")[1]).innerHTML=data_duration(debi("mov-"+file_id.split("-")[1]).duration); 
+				});
             }
 			else{
 				alert("Sorry no sound data");
@@ -665,6 +480,7 @@ document.oncontextmenu =(e)=>{
 function link_data(){
     //console.log("link_data()");
 	if(debi("selected_data").files[0].type.indexOf("audio")>=0){
+		//console.log(debi("selected_data").files[0].type.indexOf("audio"));
     	let create=URL.createObjectURL(debi("selected_data").files[0]);// faster than readAsDataURL()
 		//let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
 		//button_array[Number(file_id.split("-")[1])].data= create; 
@@ -678,15 +494,12 @@ function link_data(){
         debi("bdn-"+file_id.split("-")[1]).innerHTML=debi("selected_data").files[0].name;
         button_array[Number(file_id.split("-")[1])].name=debi("selected_data").files[0].name;
 		debi("b-"+file_id.split("-")[1]).style.backgroundColor="rgba("+button_array[file_id.split("-")[1]].color+")";
-        let b_color=trans_color(button_array[file_id.split("-")[1]].color,-75,1.00);
-		debi("b-"+file_id.split("-")[1]).style.borderTop="0px solid white";
-		debi("b-"+file_id.split("-")[1]).style.borderLeft="0px solid white";
-		debi("b-"+file_id.split("-")[1]).style.borderBottom="4px solid "+b_color;
-		debi("b-"+file_id.split("-")[1]).style.borderRight="4px solid "+b_color;
         debi("bnn-"+file_id.split("-")[1]).className="b_number_on";
         debi("bnn-"+file_id.split("-")[1]).style.color=trans_color(button_array[file_id.split("-")[1]].color,-75,1.00);
         debi("btd-"+file_id.split("-")[1]).style.backgroundColor=trans_color(button_array[file_id.split("-")[1]].color,-45,0.30);
+        //debi("bdn-"+file_id.split("-")[1]).style.color="rgba(198,198,198,1.00)";
         debi("selected_data").value="";
+        //console.log("selected_data.value="+debi("selected_data").value);
 	}
 	else{
 		alert("Sorry no sound data");
@@ -705,14 +518,9 @@ function cancel_data(){
 }
 
 function delete_data(){
-	debi("b-"+file_id.split("-")[1]).style.backgroundColor="rgba(170,170,170,1.00)";
-    debi("b-"+file_id.split("-")[1]).style.border="2px solid rgba(147,147,147,1.00)";
-    /*debi("b-"+file_id.split("-")[1]).style.borderLeft="2px solid rgba(147,147,147,1.00)";
-    debi("b-"+file_id.split("-")[1]).style.borderBottom="2px solid rgba(147,147,147,1.00)";
-    debi("b-"+file_id.split("-")[1]).style.borderRight="2px solid rgba(147,147,147,1.00)";*/
+	debi("b-"+file_id.split("-")[1]).style.backgroundColor="rgba("+127+","+127+","+127+","+0.80+")";
     debi("bnn-"+file_id.split("-")[1]).className="b_number_off";
     debi("bnn-"+file_id.split("-")[1]).style.color="white";
-    debi("bnn-"+file_id.split("-")[1]).style.fontWeight="normal";
     debi("bt-"+file_id.split("-")[1]).innerHTML="";
     debi("bdn-"+file_id.split("-")[1]).innerHTML="";
     debi("movie-"+file_id.split("-")[1]).innerHTML="";
