@@ -1,12 +1,12 @@
 @charset "UTF-8";
-/*PonTONE v1.1.0*/
+/*PonTONE v1.1.3*/
 /* CSS Document */
 body{
     position: relative;
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
-    background-color:rgba(50,50,50,1.00);
+    background-color:hsla(0,0%,20%,1.00);
 	/*color:white;*/
 }
 
@@ -40,7 +40,7 @@ body{
 	/*height:300px;*/
 	border-radius: 10px;
 	/*color: white;*/
-	background-color:rgba(240,248,255,1.00);    
+	background-color:hsla(208,100%,97%,1.00);    
 }
 
 #tytle_var{
@@ -51,7 +51,7 @@ body{
     /*height:0px;*/
 }
 #tytle{
-    color:rgba(240,248,255,1.00); 
+    color:hsla(208,100%,97%,1.00); 
     font-weight: bold; 
     text-shadow:1px 1px 1px black,0px -0px 0px black,-0px 0px 1px black,-0px -0px 0px black;
 }
@@ -84,7 +84,7 @@ body{
 #version{color:aliceblue; font-size: 12px; font-kerning: normal;}    
 
 .color-b0{
-    background-color:rgba(255,255,255,0.00);
+    background-color:hsla(0,0%,100%,0.00);
 }
 
 .button{
@@ -95,9 +95,9 @@ body{
     position: relative;
  	width:100px;
 	height:100px;
-    border: 2px solid rgba(127,127,127,1.00);
+    border: 2px solid hsla(360,0%,50%,1.00);
     border-radius: 5px;
-	background-color:rgba(170,170,170,1.00);
+	background-color:hsla(360,0%,75%,1.00);
 }
 
 .bn_div{
@@ -109,15 +109,14 @@ body{
  	width:100px;
 	height:100px;
  	border-radius: 5px;
-	background-color:rgba(255,255,255,0.00)
+	background-color:hsla(0,0%,100%,0.00)
 }
 .b_number_off{font-size: 12pt; margin-left: 2px;}
-/*.b_number_on{font-size: 12pt; margin-left: 2px;}*/
 .b_number_on{font-size: 30pt; margin-left: 0px; margin-top: -11px;}
 
 .mv_div{
 	z-index:1;
-    display:block;
+    display: none;
     position: absolute;
     left:0;
     top:0;
@@ -160,7 +159,7 @@ p{/*v.1.0.1 fixed*/
     justify-content: center;
     align-items: center;
  	border-radius: 5px;
-	background-color:rgba(255,255,255,0.00)
+	background-color:hsla(0,0%,100%,0.00)
 }
 
 .tool_var{
@@ -173,10 +172,10 @@ p{/*v.1.0.1 fixed*/
  	width:380px;
     cursor:move;
 	/*height:100px;*/
-    border: 2px solid rgba(127,127,127,1.00);
+    border: 2px solid hsla(0,0%,50%,1.00);
 	border-radius: 10px;
 	/*color: white;*/
-	background-color:rgba(255,255,255,0.30);    
+	background-color:hsla(0,0%,100%,0.30);    
 }
 .f_b_div{
     display:flex;
@@ -186,12 +185,12 @@ p{/*v.1.0.1 fixed*/
     margin-top: -0px;
     width:30px;
     height:30px;
-    border: 1px solid rgba(127,127,127,1.00);
+    border: 1px solid hsla(0,0%,50%,1.00);
 	border-radius: 3px;
-	background-color:rgba(170,170,170,1.00);
+	background-color:hsla(0,0%,67%,1.00);
     font-size:14px;
     font-weight:bold;
-    color:rgba(240,248,255,1.00);
+    color:hsla(208,100%,97%,1.00);
     
 }
 .fader{
@@ -229,16 +228,16 @@ p{/*v.1.0.1 fixed*/
 	left:0;
 	width:100%;
 	height:100%;
-	background-color:rgba(0,0,0,0.30);
+	background-color:hsla(0,0%,0%,0.30);
 }
 .confirm_lay_style{
 	display:none;
 	height:auto;
 	width:auto;
-/*    max-width: 600px*/;
+/*    max-width: 600px;*/
 	/*position:static;*/
     /*top: 20%;*/
-    margin: auto;
+    /*margin: auto;*/
     font-size: 12pt;
     /*vertical-align: middle;*/
     border: 2px solid black;
@@ -247,7 +246,7 @@ p{/*v.1.0.1 fixed*/
 }
 .confirm_lay_div{
 	display:flex;
-	height:180px;
+	height:240px;
 	width:240px;
 	flex-direction: column;
 	align-items: center;
@@ -275,4 +274,66 @@ p{/*v.1.0.1 fixed*/
     font-size: 38.77pt ;
     transform: scale(1, 1.25);
      display: inline-block;
+}
+
+.choice_lay_div{
+	z-index:5;
+	position: absolute;/*for body*/
+	display:flex;
+	height: auto;
+	width: auto;
+	flex-direction:column;
+	align-items: center;
+	justify-content: space-around;
+	border-radius: 5px;
+	background-color: hsla(0,0%,89%,1.00);
+}
+.choice_row_div{ 
+    height: 1000px;
+    width: auto;
+    display:flex;
+	flex-direction:row;
+  	flex-wrap:wrap;
+	align-items: center;
+	justify-content: space-around;
+	border-radius: 5px;
+	background-color: hsla(0,0%,89%,1.00);
+}
+.check_div{
+	display:flex;
+	height: auto;
+	width: auto;
+	flex-direction:row;
+ 	align-items: center;
+	justify-content:center;
+	border-radius: 4px;
+    /*border: 1px solid hsla(0,0%,50%,1.00);*/
+}
+.choice_bk_ground{
+    position: relative;
+    display:flex;
+	flex-direction:row;
+  	flex-wrap:wrap;
+    justify-content:space-around;
+	align-content: space-around;
+	border-radius: 4px;
+	/*color: white;*/
+    border: 1px solid hsla(0,0%,50%,1.00);
+	background-color:hsla(208,100%,97%,1.00);    
+}
+.choice_button{
+ 	display:flex;
+    justify-content:center;
+    align-items:center;
+ 	width: 28px;
+	height:28px;
+    border: 1px solid hsla(0,0%,50%,1.00);
+    border-radius: 2px;
+	background-color:hsla(0,0%,67%,1.00);
+}
+.choice_b_num{
+	margin-top:5px;
+	font-size:16pt;
+    margin-bottom: 2pt;
+	color:white;
 }
