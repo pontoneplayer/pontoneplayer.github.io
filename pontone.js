@@ -1,4 +1,4 @@
-/*PonTONE v1.1.3*/
+/*PonTONE v1.1.4*/
 
 function debi(id){
 	return document.getElementById(id);
@@ -125,6 +125,7 @@ var button_array=[];
 var sub_win;
 var window_options = "menubar=no,location=yes,resizable=yes,scrollbars=no,status=no";
 function make_buttons(num1,num2){//num1=all,num2=lines
+	debi("tytle").style.display="block";
 	debi("fader_qy").value=debi("fader").value=0;
     for(let i=0;i<num1;i++){
 		button_array.push(new myButton());
