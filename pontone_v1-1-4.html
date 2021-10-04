@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PonTONE v1.1.4</title>		
+<link href="pontone.css" rel="stylesheet" type="text/css" media="all">
+<script src="pontone.js"></script>
+</head>
+<body>
+<div id="main" class="main">
+    <div id="content" class="content">
+		<div id="view" class="view">
+        	<div id="button_background" class="button_background">
+          	</div>
+   	        <div id="tytle_var">
+                <span id="tytle">
+					<span id="l_P">P</span><span id="l_o">o</span><span id="l_n">n</span><span id="l_T">T</span><span id="l_ONE">ONE</span> <span id="version">v1.1.4</span>
+                </span>
+            </div>
+		</div>
+    </div>
+	<div id="choice_lay" class="choice_lay_div">
+	</div>
+</div>
+
+<div id="tool_var" class="tool_var">
+    <div id="f_b_div" class="f_b_div" onclick="f_b_click()">
+        <span id="f_b">ON</span>  
+    </div>
+    <div id="fader_div" class="fader_div">
+        <span id="FT">Fading Time</span>
+        <input type="range" id="fader" class="fader" min="0" max="3"  step="0.5" onchange="slide_fr()">
+        <span id="fader_qy">0.0</span> s
+    </div>
+    <div id="close_div" class="close_div">
+        <span id="close_x" class="close_x" onclick="close_tv()">×</span>
+    </div>
+</div>
+	
+<div id="confirm_background" class="confirm_background_style">
+	<div id="confirm_lay" class="confirm_lay_style"></div>
+</div>
+	<!--<div id="movie_tag"><video id="movie" height="0px"></video></div>-->
+    <script>
+		buttons_pattern();
+    </script>
+	<input type="file" id="selected_data" style="display: none" onchange="link_data()">
+</body>
+</html>

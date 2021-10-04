@@ -579,7 +579,7 @@ function sound_fade_in(num){
         //console.log("debi(mov-+num).volume="+debi("mov-"+num).volume);
         if(in_time.toFixed(1)*10%2==1){
             if(debi("bld-"+num).innerHTML==""){
-                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';//<span style="font-size:20px; color:hsla(0,0%,100%,1.00);">Fading</span>
+                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';
             }
             else{
                 debi("bld-"+num).innerHTML="";
