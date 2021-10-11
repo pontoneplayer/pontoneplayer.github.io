@@ -1,5 +1,5 @@
 @charset "UTF-8";
-/*PonTONE v1.1.4*/
+/*PonTONE v1.2.0*/
 /* CSS Document */
 body{
     position: relative;
@@ -27,7 +27,7 @@ body{
 .view{
     /*display: flex;
     flex-direction: column;
-    align-items: center;  */
+    align-items: center;  /* 垂直方向の中央寄せ */
 }
 .button_background{
     position: relative;
@@ -43,15 +43,15 @@ body{
 	background-color:hsla(208,100%,97%,1.00);    
 }
 
-#tytle_var{
-    display: flex; /* Flexboxを指定 */
+#tytle_bar{
+    display: none; /* Flexboxを指定 */
     justify-content:flex-end;
 	align-items: baseline;
     width:inherit;
     /*height:0px;*/
 }
 #tytle{
-	display:none;
+	display:block;
     color:hsla(208,100%,97%,1.00); 
     font-weight: bold; 
     text-shadow:1px 1px 1px black,0px -0px 0px black,-0px 0px 1px black,-0px -0px 0px black;
@@ -135,21 +135,39 @@ body{
 .b_time{font-size: 10pt; margin-right: 2px;}
 
 .bd_div{
-	z-index:2;
-    display: block;
-    /*justify-content: flex-end;*/
-	text-align: right;
+	z-index:3;
+    position: absolute;
+    left:0;
+    top:35px;
+ 	width:100px;
+	height:65px;
+    display: flex;
+    flex-direction: column;
+    align-content: flex-end; 
+    justify-content: flex-start;
 }
-.d_name{font-size: 10pt;} /*margin-right: 2px;}*/
 
-p{/*v.1.0.1 fixed*/
+.d_name{
+    font-size: 10pt;
+    width:inherit;
+	/*height:inherit;
+    display: flex;
+    align-content: flex-end; 
+    justify-content: flex-end;*/
+    overflow-wrap: break-word;
+	/*margin-top : 35px;*/
+	line-height: 16px;
+	text-align: right;
+} /*margin-right: 2px;}*/
+
+/*p{
     overflow-wrap: break-word;
 	margin-top : 5px ;
 	line-height: 15px;
-}
+}*/
 
 .b_lay{
-	z-index:3;
+	z-index:4;
     position: absolute;
     left:0;
     top:0;
@@ -163,20 +181,63 @@ p{/*v.1.0.1 fixed*/
 	background-color:hsla(0,0%,100%,0.00)
 }
 
-.tool_var{
-	z-index:5;
-    position: absolute;
-    display:none;
-	flex-direction:row;
+.tool_bar{
+	z-index: 10;
+	position: absolute;
+	display: none;
+	flex-direction: column;
 	justify-content: space-around;
 	align-items: center;
- 	width:380px;
-    cursor:move;
+	width: 405px;
+	cursor: move;
 	/*height:100px;*/
-    border: 2px solid hsla(0,0%,50%,1.00);
+	border: 2px solid hsla(0,0%,50%,1.00);
 	border-radius: 10px;
 	/*color: white;*/
-	background-color:hsla(0,0%,100%,0.30);    
+	background-color: hsla(0,0%,100%,0.30);
+}
+.close_div{
+    display:flex;
+    cursor:move;
+ 	width:inherit;
+    height:28px;
+    justify-content:flex-end;
+    align-items:center;
+ 	border-top-left-radius: 10px;
+ 	border-top-right-radius: 10px;
+	background-color: hsla(0,0%,100%,0.30);
+}
+.close_x{
+ 	cursor: default;
+	color: white;
+    font-size:28px;
+    margin-top:-2px;
+    margin-right:6px;
+}
+.fader_div_1{
+    display: flex;
+	flex-direction:row;
+	flex-wrap: nowrap;
+ 	width:inherit;
+    height:36px;
+	justify-content: flex-end;
+    align-items: center;
+    color:hsla(0,0%,100%,1.00); 
+    font-size: 12pt;
+    font-weight: bold;
+}
+.fader_div_0{
+    display: flex;
+	flex-direction:row;
+	flex-wrap: nowrap;
+ 	width:inherit;
+    height:36px;
+	justify-content: flex-end;
+    align-items: center;
+    color:hsla(0,0%,100%,1.00); 
+    font-size: 12pt;
+    font-weight: bold;
+	background-color: hsla(0,0%,100%,0.30);
 }
 .f_b_div{
     display:flex;
@@ -194,33 +255,21 @@ p{/*v.1.0.1 fixed*/
     color:hsla(208,100%,97%,1.00);
     
 }
-.fader{
-    height: 14px;
-    width: 120px;
-}
-.close_div{
-    display:flex;
+.master{
     cursor:pointer;
-    justify-content:flex-end;
-    margin-top: -8px;
-    /*width:inherit;*/
+    height: 14px;
+    width: 200px;
 }
-.close_x{
- 	color: white;
-    font-size:32px;
-}
-.fader_div{
-    display: flex;
-    align-items: baseline;
-    color:white; 
-    font-size: 12pt;
-    font-weight: bold;
+.fader{
+    cursor:pointer;
+    height: 14px;
+    width: 100px;
 }
 
 /*.tool_font{color:white; font-size: 12pt;font-weight: bold}*/
 
-.confirm_background_style{
-	z-index:6;
+.confirm_lay_background_style{
+	z-index:5;
     display: none;
     justify-content: center;
     align-items: center;
@@ -235,10 +284,6 @@ p{/*v.1.0.1 fixed*/
 	display:none;
 	height:auto;
 	width:auto;
-/*    max-width: 600px;*/
-	/*position:static;*/
-    /*top: 20%;*/
-    /*margin: auto;*/
     font-size: 12pt;
     /*vertical-align: middle;*/
     border: 2px solid black;
@@ -254,18 +299,89 @@ p{/*v.1.0.1 fixed*/
 	align-content: space-around;
 	justify-content: space-around;
 }
-.confirm_div_button{
-	display:flex;
-	flex-direction:row ;
-	align-items: center;
-	justify-content:space-around
-}
 
-.hyouji_table { 
-	width: 90%; 
-	/*border: solid 0.4mm black; 
-	border-collapse:collapse;*/
+.right_click_background_style{
+	z-index:5;
+    display: none;
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background-color:hsla(0,0%,0%,0.30);
 }
+.right_click_lay_style{
+	z-index:6;
+	position:absolute;
+	display:none;
+	height:auto;
+	width:auto;
+    font-size: 12pt;
+    /*vertical-align: middle;*/
+    border: 2px solid black;
+	border-radius: 5px;
+	background-color:white;
+}
+.right_click_lay_div{
+	display:flex;
+	height:320px;
+	width:160px;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-around;
+}
+.break_words{/*non flex*/
+	width:inherit;
+    overflow-wrap: break-word;
+    font-weight:bold;
+    text-align:center;
+}
+.each{
+    cursor:pointer;
+    height: 14px;
+    width: 140px;
+}
+.e-v_div_style{
+	display:flex;
+	flex-direction:column;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+.e-v-line_div_style{
+	display:flex;
+	flex-direction:row;
+	justify-content: space-around;
+}
+.clear_lay_background_style{
+	z-index:7;
+    display: none;
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background-color:hsla(0,0%,0%,0.30);
+}
+.clear_lay_style{
+	z-index:8;
+	position:absolute;
+	display:none;
+	height:100px;
+	width:160px;
+	flex-direction: column;
+	align-content: space-around;
+	justify-content: space-around;
+    font-size: 12pt;
+    /*vertical-align: middle;*/
+    border: 2px solid black;
+	border-radius: 5px;
+	background-color:white;
+}
+/*.hyouji_table { 
+	width: 90%; 
+	border: solid 0.4mm black; 
+	border-collapse:collapse;
+}*/
 
 .size_12 { font-size: 12pt ;}
 .size_13 { font-size: 13pt ;}
