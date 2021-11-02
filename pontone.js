@@ -1,4 +1,4 @@
-/*PonTONE v1.2.0*/
+/*PonTONE v1.3.0*/
 
 function debi(id){
 	return document.getElementById(id);
@@ -49,7 +49,7 @@ function buttons_pattern(){
 	//console.log(b_pattern_array)
 	debi("choice_lay").style.width=(((((6*6))+(28*6))+30)*2+(24*2))+"px";
 	debi("choice_lay").style.height=(((6*(24/6)+12)+(28*(24/6)))*2+((6*(12/6)+12)+(28*(12/6)))+((6*(6/6)+12)+(28*(6/6)))+(36*4))+"px";
-    debi("choice_lay").innerHTML='<div>Click Buttons Pattern</div>';
+    debi("choice_lay").innerHTML='<div style="color:hsla(0,0%,45%,1.00)">Click Buttons Pattern</div>';
     debi("choice_lay").innerHTML+='<div id="choice_row" class="choice_row_div"></div>';
 	for(let i=0;i<b_pattern_array.length;i++){
 		let b_num=Number(b_pattern_array[i].split("\t")[0]);
@@ -67,7 +67,7 @@ function choice_confirm(num){
     debi("cd-"+num).style.backgroundColor="hsla(0,0%,75%,1.00)";
     let open_confirm=()=>{
  	let confirm_line='<div class="confirm_lay_div">';
-		confirm_line+='<span>';
+		confirm_line+='<span style="color:hsla(0,0%,45%,1.00)">';
 			confirm_line+="Your Choice";
 		confirm_line+='</span>';
 		let c_pattern=b_pattern_array[num].split("\t")[2].replace(/\"bg-/,"\"bgc-");
@@ -123,13 +123,17 @@ function myButton(){//button object
     this.name;
     this.timer;
     this.volume=0.75;//%
-	this.cue=1,
+	this.cue=1;
 	this.loop=false;
-    this.bigining=0;
+    this.begining=0;
+    this.content="";
+    this.order;
 }
 
 /*set-up buttons*/
 var button_array=[];
+var order_array=[];
+var dummy_button="";
 var sub_win;
 var window_options = "menubar=no,location=yes,resizable=yes,scrollbars=no,status=no";
 function make_buttons(num1,num2){//num1=all,num2=lines
@@ -139,6 +143,7 @@ function make_buttons(num1,num2){//num1=all,num2=lines
 	debi("fader_qty").innerHTML="2.0";
     for(let i=0;i<num1;i++){
 		button_array.push(new myButton());
+        button_array[i].order=i;
 		let step=360/num1;
         button_array[i].color=180-step*i;
 		let buttons_line='<div id="b-'+i+'" class="button">';
@@ -176,7 +181,14 @@ function make_buttons(num1,num2){//num1=all,num2=lines
 		debi("bt-"+i).style.fontSize="9pt";//white
 		debi("bdn-"+i).style.color="hsla("+button_array[i].color+",0%,100%,1.00)";//white
 		debi("bdn-"+i).style.fontWeight="bold";
+        button_array[i].content=debi("b-"+i).innerHTML;
+        debi("b-"+i).style.order=i;
+        order_array.push(i);
     }
+    debi("button_background").innerHTML+='<div id="dummy" class="button">';
+    debi("button_background").innerHTML+='</div>'
+    debi("dummy").style.display="none";
+    //debi("dummy").style.visibility="hidden";
     debi("button_background").style.width=(num2*100+num2*20)+"px";
     debi("button_background").style.height=((num1/num2)*100+(num1/num2)*20)+"px";
 	//sub_win=open("movie.html","Display Window",window_options);
@@ -210,101 +222,309 @@ function prepare_button(num){
     debi("bld-"+num).style.backgroundColor="hsla(0,0%,100%,0.00)";
     debi("bld-"+num).innerHTML="";
     debi("mov-"+num).volume=button_array[num].volume*m_v/10
+    button_array[num].content=debi("b-"+num).innerHTML;
 }
 
 /*dataTransfer.files drag & drop*/
-document.onmouseover=mouse_over;
-function mouse_over(e){
+let check_t_bar;
+document.addEventListener("mousedown", (e)=>{//fader_div
 	if(e.target.id.indexOf("bld-")>=0){
-        //console.log("onmauseover "+e.target.id);
+        console.log("mousedown e.target.id="+e.target.id);
+        let num=Number(e.target.id.split("-")[1]);
+        if(debi("mov-"+num)){
+            if(debi("mov-"+num).paused){
+                debi("b-"+num).draggable=true;
+                console.log('mousedown  debi("b-'+num+'").draggable='+debi("b-"+num).draggable);
+            }
+        }
 	}
-    /*else{
-        return false;
-    }*/
+    else{
+        check_t_bar=e.target.id;
+    }
+});
+
+var x=0;
+var y=0;
+function button_trans(num){
+    /*debi("dummy").style.display="flex";
+    debi("dummy").style.order=button_array[num].order;
+    debi("dummy").style.visibility="hidden";
+    debi("b-"+num).style.position="absolute";
+    debi("b-"+num).style.zIndex=5;
+    debi("b-"+num).style.left=debi("dummy").offsetLeft+"px";
+    debi("b-"+num).style.top=debi("dummy").offsetTop+"px";*/
+}
+
+var drag_ele="";
+document.ondragstart=drag_start; 
+function drag_start(e){// only on browser
+    let num=Number(e.target.id.split("-")[1]);
+    if(e.target.id=="tool_bar"){
+        if(check_t_bar!="close_x" && check_t_bar!="master" && check_t_bar!="f_b" && check_t_bar!="fader"){
+            drag_ele = debi("tool_bar");
+            x = e.pageX - drag_ele.offsetLeft;
+            y = e.pageY - drag_ele.offsetTop;
+        }
+        else{
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }
+    else if(e.target.id.indexOf("b-")>=0){
+        console.log("ondragstart e.target.id="+e.target.id);
+        drag_ele = debi("b-"+num);
+		//button_trans(num);
+		debi("dummy").style.display="flex";
+		debi("dummy").style.order=button_array[num].order;
+		debi("dummy").style.visibility="hidden";
+		debi("b-"+num).style.position="absolute";
+		debi("b-"+num).style.zIndex=5;
+		debi("b-"+num).style.left=debi("dummy").offsetLeft+"px";
+		debi("b-"+num).style.top=debi("dummy").offsetTop+"px";
+   }
+    else{
+    }
+	//e.dataTransfer.setData("text/plain", e.target.id);
+    //console.log("e.dataTransfer.getData="+e.dataTransfer.getData("text"));
+}
+
+document.onmouseover=mouse_over
+function mouse_over(e){
+    e.stopPropagation();
+    e.preventDefault();
 }
 
 document.ondragenter=drag_enter;
 function drag_enter(e){
-	if(e.target.id.indexOf("bld-")>=0){
-        //console.log("ondragenter "+e.target.id);
-        e.stopPropagation();
-        e.preventDefault();
-	}
-    else{
-        return false;
-    }
+    e.stopPropagation();
+    e.preventDefault();
 }
 
-document.ondragover=drag_over;
-function drag_over(e){
-	if(e.target.id.indexOf("bld-")>=0){
-        //console.log("ondragover "+e.target.id);
-        e.stopPropagation();
-        e.preventDefault();
-	}
-    else{
-        return false;
+//document.ondrag=drag_move;//FireFox not yet
+document.ondragover=drag_move;
+function drag_move(e){
+	//console.log("drag_move drag_ele.id="+drag_ele.id);
+    if(drag_ele!=""){
+        if(drag_ele.id=="tool_bar"){
+             drag_ele.style.visibility="hidden";
+            //console.log("drag_move drag_ele.id="+drag_ele.id);
+        }
+        else if(drag_ele.id.indexOf("b-")>=0){
+			if(e.target.id.indexOf("bld-")>=0 || e.target.id==debi("button_background")){
+				let num=Number(drag_ele.id.split("-")[1]);
+                debi("b-"+num).style.visibility="hidden";
+ 				let b_bgd_w=debi("button_background").style.width.replace(/p/g,"");
+				b_bgd_w=Number(b_bgd_w.replace(/x/g,""));
+				let b_bgd_h=debi("button_background").style.height.replace(/p/g,"");
+				b_bgd_h=Number(b_bgd_h.replace(/x/g,""));
+
+				let l_p=0;//left_place
+				let t_p=0;//top_place
+				let w_c=b_bgd_w/(100+20);//wide_count
+				let h_c=b_bgd_h/(100+20);//high_count
+				let left_n=-1;//left_number
+				let top_n=-1;//top_number
+	
+				for(let i=0;i<w_c;i++){
+					if(i==0){
+						l_p=110;
+					}
+					else{
+						l_p+=120;
+					}
+					if(i==w_c-1){
+						l_p+=10;
+					}
+					if(e.pageX - debi("button_background").offsetLeft>=0 && e.pageX -   debi("button_background").offsetLeft<=l_p){
+						left_n=i;
+						break
+					}
+				}
+				for(let i=0;i<h_c;i++){
+					if(i==0){
+						t_p=110;
+					}
+					else{
+						t_p+=120;
+					}
+					if(i==h_c-1){
+						t_p+=10;
+					}
+					if(e.pageY - debi("button_background").offsetTop>=0 && e.pageY - debi("button_background").offsetTop<=t_p){
+						top_n=i;
+						break
+					}
+				}
+				if(left_n>=0 && top_n>=0){
+					//let index=Number(drag_ele.id.split("-")[1]);
+					let w_num=debi("dummy").style.order//with_number
+					let t_num=w_c*top_n+left_n;//to_number
+					if(t_num>w_num){
+						for(let i=0;i<t_num-w_num;i++){
+							debi("b-"+order_array[t_num-i]).style.order=t_num-(i+1);
+							button_array[order_array[t_num-i]].order=t_num-(i+1);
+						}
+					}
+					else if(t_num<w_num){
+						for(let i=0;i<w_num-t_num;i++){
+							debi("b-"+order_array[t_num+i]).style.order=t_num+(i+1);
+							button_array[order_array[t_num+i]].order=t_num+(i+1);
+						}
+					}
+                    debi("dummy").style.order=t_num;
+					debi("b-"+num).style.order=t_num;
+					button_array[num].order=t_num;
+					order_array.splice(w_num, 1);
+					//console.log(order_array);
+					order_array.splice(t_num, 0, num);
+					console.log(order_array);
+				}
+			}
+		}
     }
+    //else{
+    //}
+    e.stopPropagation();
+	e.preventDefault();
 }
+
 document.ondrop=drop;
 function drop(e){
-	if(e.target.id.indexOf("bld-")>=0){
-        console.log("drop "+e.target.id);
-		file_id=e.target.id;
-		let drop_func=()=>{
-			const drop_files = e.dataTransfer.files;
-			if(drop_files[0].type.indexOf("audio")>=0){
-				let num=Number(file_id.split("-")[1]);
-                debi("bdn-"+num).innerHTML=drop_files[0].name;
-				button_array[num].name=drop_files[0].name;
-				button_array[num].data= drop_files[0].type; 
-				let create=URL.createObjectURL(drop_files[0]);// faster than readAsDataURL()
-				//let create=drop_files[0];//waiting for srcObject depend on browser
-				//button_array[Number(file_id.split("-")[1])].data= create;
-                button_array[num].url=create;
-                button_array[num].loop=false;
-                button_array[num].bigining=0;
-                assign_data(num);
-            }
-			else{
-				alert("Sorry no sound data");
-			}
-		}
-        e.stopPropagation();
-        e.preventDefault();
-		if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
-			drop_func();
-		}
-		else{
-			if(debi("mov-"+e.target.id.split("-")[1]).paused){
-				drop_func();
-			}
-		}
-	}
+    console.log("drop drag_ele.id="+drag_ele.id);
+    if(drag_ele!=""){
+        if(drag_ele.id=="tool_bar"){
+            drag_ele.style.top = e.pageY - y + "px";
+            drag_ele.style.left = e.pageX - x + "px";
+            drag_ele.style.visibility="visible";
+            console.log("e.target.id="+e.target.id);
+        }
+        else if(drag_ele.id.indexOf("b-")>=0){
+            drop_mup(e);
+        }
+    }
     else{
-        //console.log("out of frame");
-        return false;
+        if(e.target.id.indexOf("bld-")>=0){
+            file_id=e.target.id;
+            let drop_func=()=>{
+                const drop_files = e.dataTransfer.files;//array
+                if(drop_files){
+					let num=Number(file_id.split("-")[1]);
+					let alert_count=0;
+					let o_c=button_array[num].order;//order_count
+					for(let i=0;i<drop_files.length;i++){
+                        if(drop_files[i]){
+                            if(drop_files[i].type.indexOf("audio")>=0){
+                                if(button_array[order_array[o_c]]){
+                                    button_array[order_array[o_c]].name=drop_files[i].name;
+                                    button_array[order_array[o_c]].data= drop_files[i].type; 
+                                    let create=URL.createObjectURL(drop_files[i]);// faster than readAsDataURL()
+                                    //let create=drop_files[0];//waiting for srcObject depend on browser
+                                    //button_array[Number(file_id.split("-")[1])].data= create;
+                                    button_array[order_array[o_c]].url=create;
+                                    button_array[order_array[o_c]].loop=false;
+                                    button_array[order_array[o_c]].begining=0;
+                                    assign_data(order_array[o_c]);
+                                }
+                                o_c++;
+                            }
+                            else{
+                                alert_count++;
+                            }
+                        }
+                    }
+					if(alert_count==1){
+						alert("Sorry "+alert_count+" file no sound data");
+					}
+					else if(alert_count>1){
+						alert("Sorry "+alert_count+" files no sound data");
+					}
+                }   
+                else{
+                    alert("Sorry no data");
+                    //e.stopPropagation();
+                    //e.preventDefault();
+                }
+            }
+            if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
+                drop_func();
+            }
+            else{
+                if(debi("mov-"+e.target.id.split("-")[1]).paused){
+                    drop_func();
+                }
+            }
+        }
+        else{
+            //e.stopPropagation();
+            //e.preventDefault();
+        }
+    }
+    e.stopPropagation();
+    e.preventDefault();
+    drag_ele="";
+}
+
+function drop_mup(e){
+	let num=Number(drag_ele.id.split("-")[1]);
+    debi("b-"+num).style.zIndex=0;
+	debi("b-"+num).style.position="relative";
+
+    debi("b-"+num).style.left="0px";//debi("dummy").offsetLeft+"px";
+    debi("b-"+num).style.top="0px";//debi("dummy").offsetTop+"px";
+    debi("b-"+num).style.visibility="visible";
+    debi("dummy").style.display="none";
+    for(let i=0;i<button_array.length;i++){
+        let order_num;
+        if(button_array[i].order<9){
+            order_num='0'+(button_array[i].order+1);
+        }    
+        else{
+            order_num=button_array[i].order+1;
+        }
+        debi("bnn-"+i).innerHTML=order_num;
+        button_array[i].content=debi("b-"+i).innerHTML;
     }
 }
 
 /*right click confirm*/
 function link_data(){
 	//console.log("link_data()");
-	if(debi("selected_data").files[0].type.indexOf("audio")>=0){
-        let num=Number(file_id.split("-")[1]);//get_number
-        button_array[num].name=debi("selected_data").files[0].name;
-		button_array[num].data= debi("selected_data").files[0].type;
-    	let create=URL.createObjectURL(debi("selected_data").files[0]);// faster than readAsDataURL()
-		//let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
-		//button_array[num].data= create; 
-        button_array[num].url=create;
-        button_array[num].loop=false;
-        button_array[num].bigining=0;
-        assign_data(num);
+    const select_files = debi("selected_data").files;
+    if(select_files){
+        let num=Number(file_id.split("-")[1]);
+        let alert_count=0;
+        let o_c=button_array[num].order;//order_count
+        for (let i=0;i<select_files.length;i++){
+            if(select_files[i]){
+                if(select_files[i].type.indexOf("audio")>=0){
+                    if(button_array[order_array[o_c]]){
+                        button_array[order_array[o_c]].name=select_files[i].name;
+                        button_array[order_array[o_c]].data=select_files[i].type;
+                        let create=URL.createObjectURL(select_files[i]);// faster than readAsDataURL()
+                        //let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
+                        //button_array[num].data= create; 
+                        button_array[order_array[o_c]].url=create;
+                        button_array[order_array[o_c]].loop=false;
+                        button_array[order_array[o_c]].begining=0;
+                        assign_data(order_array[o_c]);
+                        o_c++;
+                    }
+                }
+                else{
+                    alert_count++;
+                }
+            }
+        }
         debi("selected_data").value="";
-	}
+        if(alert_count==1){
+            alert("Sorry "+alert_count+" file no sound data");
+        }
+        else if(alert_count>1){
+            alert("Sorry "+alert_count+" files no sound data");
+        }
+    }
 	else{
-		alert("Sorry no sound data");
+		alert("Sorry no data");
 	}
 	debi("right_click_background").style.display='none';
 	debi("right_click_lay").style.display='none';
@@ -351,44 +571,55 @@ document.oncontextmenu =(e)=>{//right click safari ???
                 }
 				config_page+='<input type="button" id="b_clear" class="size_13" value="Close" onClick="close_r_click()">';
 				config_page+='</div>';
-				
-
-					debi("right_click_lay").innerHTML=config_page;
-					debi("right_click_background").style.display='block';
-					debi("right_click_lay").style.display='flex';
-					if(window.innerWidth-(e.pageX+50)<debi("right_click_lay").clientWidth){
-						con_x=window.innerWidth-(debi("right_click_lay").clientWidth);
-					}
-					else{
-						con_x=e.pageX+50;
-					}
-					if(window.innerHeight-e.pageY<40){
-						con_y=window.innerHeight-40;
-					}
-					else if(e.pageY-200<0){
-						con_y=0;					   
-					}
-					else{
-						con_y=e.pageY-200;
-					}
-					debi("right_click_lay").style.left=con_x+"px";
-					debi("right_click_lay").style.top=con_y+"px";			
-					if(button_array[num].cue==1){
-                        debi("play_whr0").checked=true;   
-                    }
-                    else{
-                        debi("play_whr1").checked=true;
-                    }
-                    debi("loop").checked=button_array[num].loop;
-                    //console.log("debi(loop).checked="+debi("loop").checked);
-					debi("each").value=debi("each_qty").innerHTML=(button_array[num].volume*10).toFixed(1);
-                    return false;
+				debi("right_click_lay").innerHTML=config_page;
+				debi("right_click_background").style.display='block';
+				debi("right_click_lay").style.display='flex';
+				if(window.innerWidth-(e.pageX+50)<debi("right_click_lay").clientWidth){
+					con_x=window.innerWidth-(debi("right_click_lay").clientWidth);
+				}
+				else{
+					con_x=e.pageX+50;
+				}
+				if(window.innerHeight-e.pageY<40){
+					con_y=window.innerHeight-40;
+				}
+				else if(e.pageY-200<0){
+					con_y=0;					   
+				}
+				else{
+					con_y=e.pageY-200;
+				}
+				debi("right_click_lay").style.left=con_x+"px";
+				debi("right_click_lay").style.top=con_y+"px";			
+				if(button_array[num].cue==1){
+					debi("play_whr0").checked=true;   
+				}
+				else{
+					debi("play_whr1").checked=true;
+				}
+				debi("loop").checked=button_array[num].loop;
+				//console.log("debi(loop).checked="+debi("loop").checked);
+				debi("each").value=debi("each_qty").innerHTML=(button_array[num].volume*10).toFixed(1);
+				//clearTimeout(long_down);
+				//console.log("clearTimeout-ID="+long_down);
+                trans_check=0;
+				console.log("never go to button_trans");
+				//console.log("trans_check="+trans_check);
+				return false;
             }
         }
         else{
+            //clearTimeout(long_down);
+            //console.log("clearTimeout-ID="+long_down);
+            trans_check=0;
+            console.log("trans_check="+trans_check);
             return false;
         }
     }
+    //clearTimeout(long_down);
+    //console.log("clearTimeout-ID="+long_down);
+    trans_check=0;
+    //console.log("trans_check="+trans_check);
     return false;
 };
 
@@ -398,6 +629,7 @@ function slide_each(num){
     debi("each_qty").innerHTML=Number(debi("each").value).toFixed(1);
         if(button_array[num].data.indexOf("audio")>=0){
             debi("mov-"+num).volume = button_array[num].volume*m_v/10;
+            button_array[num].content=debi("b-"+num).innerHTML;
         }
         else{
             //open("movie.html","Display Window",window_options);
@@ -428,6 +660,7 @@ function play_end(num){
         button_array[num].loop=false;
         debi("mov-"+num).loop=false;
     }
+    button_array[num].content=debi("b-"+num).innerHTML;
 }
 
 function change_data(){
@@ -475,6 +708,7 @@ function clear_data(num){
     button_array[num].volume=0.75;
 	button_array[num].cue=1,
 	button_array[num].loop=false;
+    button_array[num].content=debi("b-"+num).innerHTML;
 	debi("clear_lay").style.display='none';
 	debi("clear_lay_background").style.display='none';
 	debi("right_click_lay").style.display='none';
@@ -487,79 +721,96 @@ function close_r_click(){
 }
 
 /*button pad click*/
-var array_num=-1;
+var array_num=-1
 var waiting_num=-1;
+let trans_check=0;
+let long_down;
 document.addEventListener('click', (e)=>{
-	//console.log("click= "+e.target.id);
-	if(e.target.id){
-		if(e.target.id.indexOf("bld-")>=0){
-            if(debi("movie-"+e.target.id.split("-")[1]).innerHTML!=""){
-                if(debi("mov-"+e.target.id.split("-")[1]).paused){
-                    waiting_num=Number(e.target.id.split("-")[1]);
-                    let on_check=0;
-                    for(let i=0;i<button_array.length;i++){
-                        if(button_array[i].on==1){
-                            if(button_array[i].data.indexOf("audio")>=0){
-                                on_check=1;
-                                array_num=i;
-                            }
-                            else{
-                                //open("movie.html","Display Window",window_options);
-                                //window.focus();
-                            }
-                            break;
-                        }
-                    }
-                    if(on_check==0){
-                        if(button_array[waiting_num].fading==0){
-                            if(fade_on==1){
-                                start_to_play(waiting_num,1);
-                            }
-                            else{
-                                start_to_play(waiting_num,0);
-                            }
-                        }
-                        else{
-                            console.log("Fadimg Now !")
-                        }
-                     }
-                    else{
-                        if(button_array[array_num].fading==0){
-                            stop_playing(array_num); 
-                            if(fade_on==1){
-                                start_to_play(waiting_num,1);
-                            }
-                            else{
-                                start_to_play(waiting_num,0);
-                            }
-                        }
-                        else{
-                            console.log("Fadimg Now !")
-                        }
-                    }
-                }
-                else{
-					array_num=Number(e.target.id.split("-")[1]);
-					if(button_array[array_num].data.split(",")[0].indexOf("audio")>=0){
-                        if(button_array[array_num].fading==0){
-                            stop_playing(array_num);                            
-                        }
-                        else{
-                            console.log("Fading Now !")
-                        }
-                    }
-                    else{
-                        //open("movie.html","Display Window",window_options);
-                        //window.focus();
-                    }
-                }
+    if(e.target.id){
+        if(e.target.id.indexOf("bld-")>=0){
+			let num=Number(e.target.id.split("-")[1]);
+            if(trans_check==0/* && get_id==e.target.id*/){	
+                debi("b-"+num).draggable=false;
+                console.log('click debi("b-'+num+'").draggable='+debi("b-"+num).draggable);                
+                play_check(num);
+                //clearTimeout(long_down);
+                //console.log("clearTimeout-ID="+long_down);
+                trans_check=0;
             }
             else{
-                //non assigned
+                console.log("click not go to button_trans");           
             }
         }
-	}
+    }
 });
+
+function play_check(num){
+	if(debi("movie-"+num).innerHTML!=""){
+		if(debi("mov-"+num).paused){
+			waiting_num=num;
+			let on_check=0;
+			for(let i=0;i<button_array.length;i++){
+				if(button_array[i].on==1){
+					if(button_array[i].data.indexOf("audio")>=0){
+						on_check=1;
+						array_num=i;
+					}
+					else{
+						//open("movie.html","Display Window",window_options);
+						//window.focus();
+					}
+					break;
+				}
+			}
+			if(on_check==0){
+				if(button_array[waiting_num].fading==0){
+					if(fade_on==1){
+						start_to_play(waiting_num,1);
+					}
+					else{
+						start_to_play(waiting_num,0);
+					}
+				}
+				else{
+					console.log("Fadimg Now !")
+				}
+			}
+			else{
+                trans_check=0;
+				if(button_array[array_num].fading==0){
+					stop_playing(array_num); 
+					if(fade_on==1){
+						start_to_play(waiting_num,1);
+					}
+					else{
+						start_to_play(waiting_num,0);
+					}
+				}
+				else{
+					console.log("Fadimg Now !")
+				}
+			}
+		}
+		else{
+			array_num=num;
+			if(button_array[array_num].data.split(",")[0].indexOf("audio")>=0){
+				if(button_array[array_num].fading==0){
+                    stop_playing(array_num);                            
+				}
+				else{
+                    console.log("Fading Now !")
+				}
+			}
+			else{
+				//open("movie.html","Display Window",window_options);
+				//window.focus();
+			}
+		}	
+	}
+	else{
+ 		//non assigned
+	}
+}
 
 /*space key event*/
 document.onkeydown=key_down; //ページ
@@ -648,7 +899,7 @@ function to_end(num){
         debi("mov-"+num).currentTime=0;
     }
     button_array[num].loop=debi("mov-"+num).loop;
-    button_array[num].bigining=debi("mov-"+num).currentTime;
+    button_array[num].begining=debi("mov-"+num).currentTime;
     button_array[num].fading=0;
     reassign(num);
     //prepare_button(num);
@@ -663,7 +914,8 @@ function reassign(num){//stop & reflesh
         debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration); 
     });
     debi("mov-"+num).loop=button_array[num].loop;
-    debi("mov-"+num).currentTime=button_array[num].bigining;
+    debi("mov-"+num).currentTime=button_array[num].begining;
+    button_array[num].content=debi("b-"+num).innerHTML;
     prepare_button(num);
 }
 
@@ -688,7 +940,8 @@ function sound_fade_out(num){
         debi("mov-"+num).volume=(-(2/Math.pow(fo_time,2)*Math.pow(out_time,2))+1)*(button_array[num].volume*m_v/10);
         //console.log("debi(mov-"+num+").volume="+debi("mov-"+num).volume);
         if(out_time.toFixed(1)*10%2==1){
-			f_b_flick();
+            f_b_flick();
+            //console.log("out flick");
 			if(debi("bld-"+num).innerHTML==""){
                 debi("bld-"+num).innerHTML='<span style="font-size:28pt; font-weight:bold; transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">OUT</span>';
 			}
@@ -702,6 +955,7 @@ function sound_fade_out(num){
         //console.log("debi(mov-"+num+").volume="+debi("mov-"+num).volume);
         if(out_time.toFixed(1)*10%2==1){
 			f_b_flick();
+            //console.log("out flick");
             if(debi("bld-"+num).innerHTML==""){
                 debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">OUT</span>';
             }
@@ -769,7 +1023,10 @@ function sound_fade_in(num){
         debi("mov-"+num).volume=(2/Math.pow(fi_time,2))*(Math.pow(in_time,2))*(button_array[num].volume*m_v/10);
         //console.log("debi(mov-"+num+").volume="+debi("mov-"+num).volume);
         if(in_time.toFixed(1)*10%2==1){
-			f_b_flick();
+            if(out_time==0){
+               f_b_flick();
+                //console.log("in flick");
+            }
             if(debi("bld-"+num).innerHTML==""){
                 debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';//<span style="font-size:20px; color:hsla(0,0%,100%,1.00);">Fading</span>
             }
@@ -782,7 +1039,10 @@ function sound_fade_in(num){
         debi("mov-"+num).volume=((-(2/Math.pow(fi_time,2))*Math.pow((in_time-fi_time),2))+1)*(button_array[num].volume*m_v/10);
         //console.log("debi(mov-"+num+").volume="+debi("mov-"+num).volume);
         if(in_time.toFixed(1)*10%2==1){
-			f_b_flick();
+            if(out_time==0){
+                f_b_flick();
+                //console.log("in flick");
+            }
             if(debi("bld-"+num).innerHTML==""){
                 debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';//<span style="font-size:20px; color:hsla(0,0%,100%,1.00);">Fading</span>
             }
@@ -795,36 +1055,9 @@ function sound_fade_in(num){
 
 /*change color*/
 
+/*eventListener*/
+
 /*tool_bar*/
-var x=0;
-var y=0;
-let drag_ele;
-function drag_move(e){
-    //console.log("mousemove= "+e.target.id);
-    drag_ele.style.top = e.pageY - y + "px";
-    drag_ele.style.left = e.pageX - x + "px";
-    drag_ele.addEventListener("mouseup", drop_mup, false);
-    document.addEventListener("mouseleave", drop_mup, false);
-    return false;
-}
-
-function drop_mup(e){
-    document.removeEventListener("mousemove", drag_move, false);
-    drag_ele.removeEventListener("mouseup", drop_mup, false);
-}
-
-document.addEventListener("mousedown", (e)=>{//fader_div
-    //console.log("e.target.id="+e.target.id);
-	if(e.target.id=="tool_bar" || e.target.id=="close_div" || e.target.id=="m_volume_div" || e.target.id=="MV" || e.target.id=="main_qty" || e.target.id=="fader_div" || e.target.id=="FT" || e.target.id=="fader_qty"){
-        drag_ele = debi("tool_bar");
-        x = e.pageX - drag_ele.offsetLeft;
-        y = e.pageY - drag_ele.offsetTop;
-        console.log("x="+x+" y="+y);//
-        document.addEventListener("mousemove", drag_move, false);
-    }
-    return false;
-});
-
 var m_v=0;//master_volume
 function slide_mr(){
 	m_v=Number(debi("master").value).toFixed(1);
@@ -893,6 +1126,26 @@ document.addEventListener('dblclick', (e)=>{
                 }
             }
         }*/
+        else if(e.target.id=="button_background"){
+            for(let i=0;i<order_array.length;i++){
+                let num=order_array[i];
+                let hue_num=button_array[num].color=180+(360/order_array.length)*i;
+                debi("b-"+num).style.backgroundColor="hsla("+hue_num+",70%,50%,0.60)";
+                debi("b-"+num).style.borderTop="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+                debi("b-"+num).style.borderLeft="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+                debi("b-"+num).style.borderBottom="4px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+                debi("b-"+num).style.borderRight="4px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+                debi("bnn-"+num).className="b_number_on";
+                debi("bnn-"+num).style.color="hsla("+hue_num+",90%,35%,0.80)";
+                //debi("bti-"+num).innerHTML=debi("mov-"+num).currentTime.toFixed(1)+"/";
+                debi("btd-"+num).style.backgroundColor="hsla("+hue_num+",75%,45%,0.40)";
+                //debi("bdn-"+num).style.color="hsla(0,0%,100%,1.00)";
+                //debi("bld-"+num).style.backgroundColor="hsla(0,0%,100%,0.00)";
+                //debi("bld-"+num).innerHTML="";
+                //debi("mov-"+num).volume=button_array[num].volume*m_v/10
+                button_array[num].content=debi("b-"+num).innerHTML;
+            }
+        }
         else{
             return false;
         }

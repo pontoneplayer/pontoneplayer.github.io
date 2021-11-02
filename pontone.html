@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>PonTONE v1.2.0</title>		
+<title>PonTONE v1.3.0</title>		
 <link href="pontone.css" rel="stylesheet" type="text/css" media="all">
 <script src="pontone.js"></script>
 </head>
@@ -12,10 +12,12 @@
 		<div id="view" class="view">
         	<div id="button_background" class="button_background">
         		<!--<div id="" class="button">TEST</div>-->
+			<div id="trans_copy" class="button" style="display:none">
+			</div>
          	</div>
    	        <div id="tytle_bar">
                 <span id="tytle">
-					<span id="l_P">P</span><span id="l_o">o</span><span id="l_n">n</span><span id="l_T">T</span><span id="l_ONE">ONE</span> <span id="version">v1.2.0</span>
+					<span id="l_P">P</span><span id="l_o">o</span><span id="l_n">n</span><span id="l_T">T</span><span id="l_ONE">ONE</span> <span id="version">v1.3.0</span>
                 </span>
             </div>
 		</div>
@@ -24,7 +26,7 @@
 	</div>
 </div>
 
-<div id="tool_bar" class="tool_bar">
+<div id="tool_bar" class="tool_bar" draggable="true">
     <div id="close_div" class="close_div">
         <span id="close_x" class="close_x" onclick="close_tv()">×</span>
     </div>
@@ -56,6 +58,6 @@
     <script>
 		buttons_pattern();
     </script>
-	<input type="file" id="selected_data" style="display: none" onchange="link_data()">
+	<input type="file" id="selected_data" style="display: none" onchange="link_data()" multiple>
 </body>
 </html>
