@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>PonTONE v1.3.0</title>		
+<title>PonTONE v1.3.1</title>		
 <link href="pontone.css" rel="stylesheet" type="text/css" media="all">
 <script src="pontone.js"></script>
 </head>
@@ -17,7 +17,7 @@
          	</div>
    	        <div id="tytle_bar">
                 <span id="tytle">
-					<span id="l_P">P</span><span id="l_o">o</span><span id="l_n">n</span><span id="l_T">T</span><span id="l_ONE">ONE</span> <span id="version">v1.3.0</span>
+					<span id="l_P">P</span><span id="l_o">o</span><span id="l_n">n</span><span id="l_T">T</span><span id="l_ONE">ONE</span> <span id="version">v1.3.1</span>
                 </span>
             </div>
 		</div>
@@ -54,10 +54,17 @@
 <div id="clear_lay_background" class="clear_lay_background_style">
  <div id="clear_lay" class="clear_lay_style"></div>
 </div>
+<div id="seek_lay_background" class="seek_lay_background_style">
+  <div id="seek_lay" class="seek_lay_style"></div>
+</div>
+
 	<!--<div id="movie_tag"><video id="movie" height="0px"></video></div>-->
     <script>
 		buttons_pattern();
     </script>
 	<input type="file" id="selected_data" style="display: none" onchange="link_data()" multiple>
+    <div id="visualizer"></div>
+    <!--<canvas id="visualizer" height="255"></canvas>-->
+
 </body>
 </html>

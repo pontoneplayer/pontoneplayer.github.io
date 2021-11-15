@@ -1,5 +1,5 @@
 @charset "UTF-8";
-/*PonTONE v1.3.0*/
+/*PonTONE v1.3.1*/
 /* CSS Document */
 body{
     position: relative;
@@ -475,4 +475,39 @@ body{
 .default_b{
     background-color:hsla(0,0%,50%,1.00);
     color:white;
+}
+.canvas_css{
+    visibility: hidden;
+}
+.seek_lay_background_style{
+	z-index:9;
+    display: none;
+    justify-content: center;
+    align-items: center;
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background-color:hsla(0,0%,0%,0.30);
+}
+.seek_lay_style{
+	display:none;
+	height:auto;
+	width:auto;
+    font-size: 12pt;
+    /*vertical-align: middle;*/
+    border: 2px solid black;
+	border-radius: 5px;
+	background-color:white;
+}
+.seek_lay_div{
+	display:flex;
+	height:36px;
+	width:340px;
+    font-weight: bold; 
+	flex-direction: column;
+	align-items: center;
+	align-content: space-around;
+	justify-content: space-around;
 }
