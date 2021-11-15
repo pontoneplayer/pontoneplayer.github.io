@@ -529,7 +529,7 @@ function link_data(){
 function seek_alert_on(){
     let seeking_line='<div class="seek_lay_div">';
     seeking_line+='<span style="color:hsla(0,0%,45%,1.00)">';
-    seeking_line+='ajusting cue timing of sounds';
+    seeking_line+='adjusting cue timing of sounds';
     seeking_line+='</span>';
     seeking_line+='</div>';
     debi("seek_lay").innerHTML=seeking_line;
