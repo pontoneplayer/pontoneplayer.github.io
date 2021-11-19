@@ -1,4 +1,4 @@
-/*PonTONE v1.3.1*/
+/*PonTONE v1.3.2*/
 
 function debi(id){
 	return document.getElementById(id);
@@ -211,7 +211,8 @@ function prepare_button(num){
     debi("b-"+num).style.borderRight="4px solid "+"hsla("+hue_num+",90%,35%,0.80)";
     debi("bnn-"+num).className="b_number_on";
     debi("bnn-"+num).style.color="hsla("+hue_num+",90%,35%,0.80)";
-    debi("bti-"+num).innerHTML=(debi("mov-"+num).currentTime-button_array[num].start).toFixed(1)+"/";
+    debi("bti-"+num).innerHTML=(debi("mov-"+num).currentTime.toFixed(3)-button_array[num].start.toFixed(3)).toFixed(1)+"/";
+        
     debi("btd-"+num).style.backgroundColor="hsla("+hue_num+",75%,45%,0.40)";
     debi("bdn-"+num).style.color="hsla(0,0%,100%,1.00)";
     debi("bld-"+num).style.backgroundColor="hsla(0,0%,100%,0.00)";
@@ -224,12 +225,12 @@ function prepare_button(num){
 let check_t_bar;
 document.addEventListener("mousedown", (e)=>{//fader_div
 	if(e.target.id.indexOf("bld-")>=0){
-        console.log("mousedown e.target.id="+e.target.id);
+        //console.log("mousedown e.target.id="+e.target.id);
         let num=Number(e.target.id.split("-")[1]);
         if(debi("mov-"+num)){
             if(debi("mov-"+num).paused){
                 debi("b-"+num).draggable=true;
-                console.log('mousedown  debi("b-'+num+'").draggable='+debi("b-"+num).draggable);
+                //console.log('mousedown  debi("b-'+num+'").draggable='+debi("b-"+num).draggable);
             }
         }
 	}
@@ -591,7 +592,7 @@ function seek_nosound_time(o_c,select_file){
                 button_array[order_array[o_c]].start=sit-0.2;
             }
             assign_count--;
-            console.log("assign_count="+assign_count);
+            //console.log("assign_count="+assign_count);
             assign_data(order_array[o_c]);
             if(assign_count==0){
                 debi("visualizer").innerHTML="";	
@@ -814,7 +815,7 @@ document.addEventListener('click', (e)=>{
 			let num=Number(e.target.id.split("-")[1]);
             if(trans_check==0/* && get_id==e.target.id*/){	
                 debi("b-"+num).draggable=false;
-                console.log('click debi("b-'+num+'").draggable='+debi("b-"+num).draggable);                
+                //console.log('click debi("b-'+num+'").draggable='+debi("b-"+num).draggable);
                 play_check(num);
                 //clearTimeout(long_down);
                 //console.log("clearTimeout-ID="+long_down);
@@ -919,7 +920,8 @@ function key_down(event){//
 
 /*time*/
 function t_ing(num){//time progress
-    let running=debi("mov-"+num).currentTime-button_array[num].start;
+    let running=debi("mov-"+num).currentTime.toFixed(3)-button_array[num].start.toFixed(3);
+    //console.log("running="+running);
     let second;
     if(Math.floor(running/60)==0){
         running=running.toFixed(1);
