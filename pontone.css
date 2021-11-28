@@ -1,5 +1,5 @@
 @charset "UTF-8";
-/*PonTONE v1.3.2*/
+/*PonTONE v1.3.3*/
 /* CSS Document */
 body{
     position: relative;
@@ -7,6 +7,7 @@ body{
     justify-content: flex-end;
     align-items: flex-start;
     background-color:hsla(0,0%,20%,1.00);
+    font-family: sans-serif;
 	/*color:white;*/
 }
 

@@ -1,4 +1,4 @@
-/*PonTONE v1.3.2*/
+/*PonTONE v1.3.3*/
 
 function debi(id){
 	return document.getElementById(id);
@@ -196,10 +196,10 @@ function assign_data(num){//new index_number
     debi("mov-"+num).src=button_array[num].url;
     debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
         debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-Math.floor(button_array[num].start)); 
-    });
     debi("mov-"+num).currentTime=button_array[num].start;
     console.log('debi("mov-"+num).currentTime='+debi("mov-"+num).currentTime);
     prepare_button(num);
+    });
 }
 
 function prepare_button(num){
@@ -275,7 +275,9 @@ function drag_start(e){// only on browser
 		debi("b-"+num).style.position="absolute";
 		debi("b-"+num).style.zIndex=5;
 		debi("b-"+num).style.left=debi("dummy").offsetLeft+"px";
+        debi("x_p").innerHTML=debi("dummy").offsetLeft;
 		debi("b-"+num).style.top=debi("dummy").offsetTop+"px";
+        debi("y_p").innerHTML=debi("dummy").offsetTop;
     }
     else{
     }
@@ -302,6 +304,8 @@ function drag_move(e){
         }
         else if(drag_ele.id.indexOf("b-")>=0){
 			if(e.target.id.indexOf("bld-")>=0 || e.target.id==debi("button_background")){
+        //debi("x_p").innerHTML=e.pageX - debi("button_background").offsetLeft;
+        //debi("y_p").innerHTML=e.pageY - debi("button_background").offsetTop;
 				let num=Number(drag_ele.id.split("-")[1]);
                 debi("b-"+num).style.visibility="hidden";
  				let b_bgd_w=debi("button_background").style.width.replace(/p/g,"");
@@ -396,22 +400,30 @@ function drop(e){
             file_id=e.target.id;
             let drop_func=()=>{
                 const drop_files = e.dataTransfer.files;//array
-                assign_count=drop_files.length;
                 if(drop_files){
 					let num=Number(file_id.split("-")[1]);
 					let alert_count=0;
+                    let o_c=button_array[num].order;//order_count
+                    let repeat_count;
+                    if((order_array.length-o_c)>=drop_files.length){
+                        assign_count=repeat_count=drop_files.length;
+                        //console.log("if video_check_count="+video_check_count);
+                    }
+                    else{
+                        assign_count=repeat_count=order_array.length-o_c;
+                        //console.log("else video_check_count="+video_check_count);
+                    }
                     seek_alert_on();
-					//let o_c=button_array[num].order;//order_count
-					for(let i=0;i<drop_files.length;i++){
+					for(let i=0;i<repeat_count;i++){
                         if(drop_files[i]){
                             if(drop_files[i].type.indexOf("audio")>=0){
-                                let o_c=button_array[num].order+i;
+                                let create=URL.createObjectURL(drop_files[i]);// faster than readAsDataURL()                                //let o_c=button_array[num].order+i;
                                 if(button_array[order_array[o_c]]){
                                     console.log("o_c="+o_c);
                                     button_array[order_array[o_c]].name=drop_files[i].name;
                                     button_array[order_array[o_c]].type= drop_files[i].type; 
                                     //button_array[order_array[o_c]].data= drop_files[i]; 
-                                    let create=URL.createObjectURL(drop_files[i]);// faster than readAsDataURL()
+
                                     //let create=drop_files[0];//waiting for srcObject depend on browser
                                     //button_array[Number(file_id.split("-")[1])].data= create;
                                     button_array[order_array[o_c]].url=create;
@@ -484,16 +496,21 @@ function drop_mup(e){
 var assign_count=0;
 function link_data(){
     const select_files = debi("selected_data").files;
-    assign_count=select_files.length;
     if(select_files){
         let num=Number(file_id.split("-")[1]);
         let alert_count=0;
+        let o_c=button_array[num].order;//order_count
+        let repeat_count;
+        if((order_array.length-o_c)>=select_files.length){
+            assign_count=repeat_count=select_files.length;
+        }
+        else{
+            assign_count=repeat_count=order_array.length-o_c;
+        }
         seek_alert_on();
-        //let o_c=button_array[num].order;//order_count
-        for (let i=0;i<select_files.length;i++){
+        for (let i=0;i<repeat_count;i++){
             if(select_files[i]){
                 if(select_files[i].type.indexOf("audio")>=0){
-                    let o_c=button_array[num].order+i;
                     if(button_array[order_array[o_c]]){
                         console.log("o_c="+o_c);
                         button_array[order_array[o_c]].name=select_files[i].name;
@@ -506,6 +523,7 @@ function link_data(){
                         
                         seek_nosound_time(o_c,select_files[i]);
                     }
+                    o_c++;
                 }
                 else{
                     alert_count++;
@@ -530,7 +548,15 @@ function link_data(){
 function seek_alert_on(){
     let seeking_line='<div class="seek_lay_div">';
     seeking_line+='<span style="color:hsla(0,0%,45%,1.00)">';
-    seeking_line+='adjusting cue timing of sounds';
+    //seeking_line+='adjusting cue timing of sounds';
+    if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+        //s_d_array_count=video_check_count;//video_check_count
+        seeking_line+='safari do not adjust cue timing of sounds';
+    }
+    else{
+        //assign_count=video_check_count;
+        seeking_line+='adjusting cue timing of sounds';
+    }
     seeking_line+='</span>';
     seeking_line+='</div>';
     debi("seek_lay").innerHTML=seeking_line;
@@ -545,6 +571,15 @@ function seek_alert_off(){
 }
 
 function seek_nosound_time(o_c,select_file){
+    if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+        assign_count--;
+        assign_data(order_array[o_c]);
+        if(assign_count==0){
+            //debi("visualizer").innerHTML="";	
+            seek_alert_off();
+        }
+    }
+    else{
     let source;
     let animationId;
     let audioContext = new AudioContext();
@@ -615,6 +650,7 @@ function seek_nosound_time(o_c,select_file){
             animationId = requestAnimationFrame(render);
         });
     };
+    }
  }
 
 var file_id="";
@@ -626,7 +662,14 @@ document.oncontextmenu =(e)=>{//right click safari ???
 			file_id=e.target.id;
 			let num=Number(e.target.id.split("-")[1]);
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
-				debi("selected_data").click();// onchange="link_data()"
+                if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+                    //console.log(window.navigator.userAgent.toLowerCase());
+                    alert('sorry safari assigns by only drag & drop');
+                }
+                else{
+                    debi("selected_data").click();// onchange="link_data()"
+                }
+                return false;
 			}
             else{
 				let config_page='<div class="right_click_lay_div">';
@@ -997,11 +1040,11 @@ function reassign(num){//stop & reflesh
     debi("mov-"+num).src=button_array[num].url;
     debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
         debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-Math.floor(button_array[num].start)); 
-    });
     debi("mov-"+num).loop=button_array[num].loop;
     debi("mov-"+num).currentTime=button_array[num].begining;
     button_array[num].content=debi("b-"+num).innerHTML;
     prepare_button(num);
+    });
 }
 
 /*sound fade out*/
@@ -1205,7 +1248,7 @@ document.addEventListener('dblclick', (e)=>{
         else if(e.target.id=="button_background"){
             for(let i=0;i<order_array.length;i++){
                 let num=order_array[i];
-                let hue_num=button_array[num].color=180+(360/order_array.length)*i;
+                let hue_num=button_array[num].color=180-(360/order_array.length)*i;
                 debi("b-"+num).style.backgroundColor="hsla("+hue_num+",70%,50%,0.60)";
                 debi("b-"+num).style.borderTop="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
                 debi("b-"+num).style.borderLeft="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
