@@ -1,4 +1,4 @@
-/*PonTONE v1.3.3*/
+/*PonTONE v1.4.0*/
 
 function debi(id){
 	return document.getElementById(id);
@@ -656,20 +656,54 @@ function seek_nosound_time(o_c,select_file){
 var file_id="";
 var con_x;//config
 var con_y;
-document.oncontextmenu =(e)=>{//right click safari ???
+//document.oncontextmenu =(e)=>{//right click safari ???
+function test_onclick(get_id){
+    console.log(get_id+" clicked !");
+}
+
+function change_event(){
+                    //if (document.createEvent) {
+                        const evt = document.createEvent('MouseEvents');
+                        // イベントの初期化
+                        evt.initEvent('focus', false, false);
+                        // イベントを発生させる
+                        let elm = debi("selected_data");
+                        elm.dispatchEvent(evt);
+    debi("selected_data").focus();
+    debi("selected_data").click();
+    console.log("change_event");
+                    //}
+
+}
+document.addEventListener('contextmenu',(e)=>{
+    e.preventDefault();
+    //e.stopPropagation();
     if(e.target.id){
         if(e.target.id.indexOf("bld-")>=0){
 			file_id=e.target.id;
 			let num=Number(e.target.id.split("-")[1]);
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
                 if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+                    let safari_file=setTimeout(()=>{
+                        change_event();
+                        console.log("safari");
+                        clearTimeout(safari_file);
+                    },100);
                     //console.log(window.navigator.userAgent.toLowerCase());
-                    alert('sorry safari assigns by only drag & drop');
+                    //alert('sorry safari assigns by only drag & drop');
+                    //debi("select_test").click();
+                    //console.log("safari");
+ 
                 }
                 else{
-                    debi("selected_data").click();// onchange="link_data()"
+                     let safari_file=setTimeout(()=>{
+                        change_event();
+                        console.log("others");
+                        clearTimeout(safari_file);
+                    },100);
+                   //debi("select_test").click();// onchange="link_data()"
+                    //console.log("others");
                 }
-                return false;
 			}
             else{
 				let config_page='<div class="right_click_lay_div">';
@@ -734,7 +768,7 @@ document.oncontextmenu =(e)=>{//right click safari ???
                 trans_check=0;
 				console.log("never go to button_trans");
 				//console.log("trans_check="+trans_check);
-				return false;
+				//return false;
             }
         }
         else{
@@ -742,15 +776,137 @@ document.oncontextmenu =(e)=>{//right click safari ???
             //console.log("clearTimeout-ID="+long_down);
             trans_check=0;
             console.log("trans_check="+trans_check);
-            return false;
+            //return false;
         }
     }
     //clearTimeout(long_down);
     //console.log("clearTimeout-ID="+long_down);
     trans_check=0;
-    return false;
-};
+    //return false;
+});
 
+var clickTimer=null;
+document.addEventListener('touchstart', (e)=>{
+    if (clickTimer == null) {
+        clickTimer = setTimeout(()=>{
+            clearTimeout(clickTimer);
+            clickTimer = null;
+            if(e.target.id){
+                e.stopPropagation();
+                e.preventDefault();
+                //document.addEventListener("touchend",(e)=>{
+                if(e.target.id.indexOf("bld-")>=0){
+                    console.log("e.target.id 1="+e.target.id);
+                    file_id=e.target.id;
+                    let num=Number(e.target.id.split("-")[1]);
+                    if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
+                        debi("selected_data").click();// onchange="link_data()"
+                        console.log("e.target.id 2="+e.target.id);
+                        /*if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+                            console.log(window.navigator.userAgent.toLowerCase());
+                            alert('sorry safari assigns by only drag & drop');
+                        }
+                         else{
+                        }*/
+                        //return false;
+                    }
+                    else{
+                        let config_page='<div class="right_click_lay_div">';
+                        config_page+='<span class="break_words">';
+						config_page+=debi("bdn-"+num).innerHTML;
+                        config_page+='</span>';
+                        config_page+='<div class="e-v_div_style">';
+						config_page+='<div class="e-v-line_div_style">';
+                        config_page+='<span id="EV">Volume</span>';
+                        config_page+='<span id="each_qty">0.0</span>';
+						config_page+='</div>';
+                        config_page+='<input type="range" id="each" class="each" min="0" max="10" step="0.5" onchange="slide_each('+num+')">';
+                        config_page+='</div>';
+                        config_page+='<div class="e-v-line_div_style">';
+                        config_page+='<label>';
+                        config_page+='<input type="radio" name="play" value="1" id="play_whr0" checked onchange="play_whr('+num+')">Cue';//where
+                        config_page+='</label>';
+                        config_page+='<label>';
+                        config_page+='<input type="radio" name="play" value="0" id="play_whr1" onchange="play_whr('+num+')">Continue';
+                        config_page+='</label>';
+                        config_page+='</div>';
+                        config_page+='<label>';
+                        config_page+='<input type="checkbox" name="loop" value="0" id="loop" onchange="play_end('+num+')">Loop';
+                        config_page+='</label>';
+                        if(debi("mov-"+num).paused){
+                            config_page+='<input type="button" id="b_change" class="size_13" value="Change" onClick="change_data()">';
+                            config_page+='<input type="button" id="b_clear" class="size_13" value="Clear" 	onClick="clear_confirm('+num+')">';
+                        }
+                        config_page+='<input type="button" id="b_clear" class="size_13" value="Close" onClick="close_r_click()">';
+                        config_page+='</div>';
+                        debi("right_click_lay").innerHTML=config_page;
+                        debi("right_click_background").style.display='block';
+                        debi("right_click_lay").style.display='flex';
+                        if(window.innerWidth-(e.pageX+50)<debi("right_click_lay").clientWidth){
+                            con_x=window.innerWidth-(debi("right_click_lay").clientWidth);
+                        }
+                        else{
+                            con_x=e.pageX+50;
+                        }
+                        if(window.innerHeight-e.pageY<40){
+                            con_y=window.innerHeight-40;
+                        }
+                        else if(e.pageY-200<0){
+                            con_y=0;					   
+                        }
+                        else{
+                            con_y=e.pageY-200;
+                        }
+                        debi("right_click_lay").style.left=con_x+"px";
+                        debi("right_click_lay").style.top=con_y+"px";			
+                        if(button_array[num].cue==1){
+                            debi("play_whr0").checked=true;   
+                        }
+                        else{
+                            debi("play_whr1").checked=true;
+                        }
+                        debi("loop").checked=button_array[num].loop;
+                        //console.log("debi(loop).checked="+debi("loop").checked);
+                        debi("each").value=debi("each_qty").innerHTML=(button_array[num].volume*10).toFixed(1);
+                        //clearTimeout(long_down);
+                        //console.log("clearTimeout-ID="+long_down);
+                        trans_check=0;
+                        console.log("never go to button_trans");
+                        //console.log("trans_check="+trans_check);
+                        //return false;
+                    }
+                }
+                else{
+                    //clearTimeout(long_down);
+                    //console.log("clearTimeout-ID="+long_down);
+                    trans_check=0;
+                    console.log("trans_check="+trans_check);
+                    //return false;
+                }
+                //return false;
+                //});
+            }
+            //clearTimeout(long_down);
+            //console.log("clearTimeout-ID="+long_down);
+            trans_check=0;
+            //return false;
+
+        }, 500);
+	}
+    else{
+        clearTimeout(clickTimer);
+        clickTimer = null;
+    }
+    return false;
+});
+
+document.addEventListener("touchend",(e)=>{
+    if(clickTimer != null){
+        clearTimeout(clickTimer);
+        clickTimer = null;
+    }
+});
+                          
 function slide_each(num){
 	button_array[num].volume=Number(debi("each").value)/10;
     debi("each_qty").innerHTML=Number(debi("each").value).toFixed(1);
@@ -856,7 +1012,7 @@ document.addEventListener('click', (e)=>{
     if(e.target.id){
         if(e.target.id.indexOf("bld-")>=0){
 			let num=Number(e.target.id.split("-")[1]);
-            if(trans_check==0/* && get_id==e.target.id*/){	
+            if(trans_check==0){	//&& get_id==e.target.id
                 debi("b-"+num).draggable=false;
                 //console.log('click debi("b-'+num+'").draggable='+debi("b-"+num).draggable);
                 play_check(num);

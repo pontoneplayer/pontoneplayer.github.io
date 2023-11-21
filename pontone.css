@@ -1,5 +1,5 @@
 @charset "UTF-8";
-/*PonTONE v1.3.3*/
+/*PonTONE v1.4.0*/
 /* CSS Document */
 body{
     position: relative;
@@ -408,6 +408,12 @@ body{
     transform: scale(1, 1.25);
      display: inline-block;
 }
+
+.selected_file{
+    display: none;
+    cursor:pointer;
+}
+
 
 .choice_lay_div{
 	z-index:5;

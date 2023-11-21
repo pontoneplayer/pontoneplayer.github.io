@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PonTONE v1.4.0</title>		
+<link href="pontone.css" rel="stylesheet" type="text/css" media="all">
+<script src="pontone.js"></script>
+</head>
+<body>
+<div id="main" class="main">
+    <div id="content" class="content">
+		<div id="view" class="view">
+        	<div id="button_background" class="button_background">
+        		<!--<div id="" class="button">TEST</div>-->
+			<div id="trans_copy" class="button" style="display:none">
+			</div>
+         	</div>
+   	        <div id="tytle_bar">
+                <span id="tytle">
+					<span id="l_P">P</span><span id="l_o">o</span><span id="l_n">n</span><span id="l_T">T</span><span id="l_ONE">ONE</span> <span id="version">v1.4.0</span>
+                </span>
+    	    <!--<input type="button" id="select_test" onclick="change_data();test_onclick(this.id)" onmouseup="change_data();test_onclick(this.id)" value="　select　">-->
+            </div>
+    	    <input type="file" id="selected_data" class="selected_file" onclick="test_onclick(this.id)" onmouseup="test_onclick(this.id)" onchange="link_data()" multiple>
+		</div>
+    </div>
+	<div id="choice_lay" class="choice_lay_div">
+	</div>
+
+</div>
+
+<div id="tool_bar" class="tool_bar" draggable="true">
+    <div id="close_div" class="close_div">
+        <span id="close_x" class="close_x" onclick="close_tv()">×</span>
+    </div>
+    <div id="master_div" class="fader_div_1">
+       	<span id="MV">Master Volume</span>　
+        <input type="range" id="master" class="master" min="0" max="10"  step="0.5" onchange="slide_mr()">　
+       	<span id="master_qty">0</span>
+   	</div>  
+   	<div id="fader_div" class="fader_div_0">
+	    <div id="f_b_div" class="f_b_div" onclick="f_b_click()">
+    	    <span id="f_b">ON</span> 
+    	</div>　
+       	<span id="FT">Fading Time(s)</span>　
+       	<input type="range" id="fader" class="fader" min="0" max="3"  step="0.5" onchange="slide_fr()">　
+       	<span id="fader_qty">0.0</span>
+   	</div>
+</div>
+	
+<div id="confirm_lay_background" class="confirm_lay_background_style">
+  <div id="confirm_lay" class="confirm_lay_style"></div>
+</div>
+<div id="right_click_background" class="right_click_background_style">
+  <div id="right_click_lay" class="right_click_lay_style"></div>
+</div>
+<div id="clear_lay_background" class="clear_lay_background_style">
+ <div id="clear_lay" class="clear_lay_style"></div>
+</div>
+<div id="seek_lay_background" class="seek_lay_background_style">
+  <div id="seek_lay" class="seek_lay_style"></div>
+</div>
+
+	<!--<div id="movie_tag"><video id="movie" height="0px"></video></div>-->
+    <script>
+		buttons_pattern();
+    </script>
+	<!--<input type="file" id="selected_data" class="selected_file" onchange="link_data()" multiple>-->
+    <div id="visualizer"></div>
+    <div style="display:none">x =<span id="x_p"></span>　<span id="y_p">y =</span></div>
+    <!--<canvas id="visualizer" height="255"></canvas>-->
+
+</body>
+</html>
