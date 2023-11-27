@@ -1,4 +1,4 @@
-/*PonTONE v1.3.3*/
+/*PonTONE v1.3.4*/
 
 function debi(id){
 	return document.getElementById(id);
@@ -549,14 +549,14 @@ function seek_alert_on(){
     let seeking_line='<div class="seek_lay_div">';
     seeking_line+='<span style="color:hsla(0,0%,45%,1.00)">';
     //seeking_line+='adjusting cue timing of sounds';
-    if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+    /*if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
         //s_d_array_count=video_check_count;//video_check_count
         seeking_line+='safari do not adjust cue timing of sounds';
     }
-    else{
+    else{*/
         //assign_count=video_check_count;
         seeking_line+='adjusting cue timing of sounds';
-    }
+    //}
     seeking_line+='</span>';
     seeking_line+='</div>';
     debi("seek_lay").innerHTML=seeking_line;
@@ -571,87 +571,93 @@ function seek_alert_off(){
 }
 
 function seek_nosound_time(o_c,select_file){
-    if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
-        assign_count--;
-        assign_data(order_array[o_c]);
-        if(assign_count==0){
-            //debi("visualizer").innerHTML="";	
-            seek_alert_off();
-        }
-    }
-    else{
-    let source;
-    let animationId;
-    let audioContext = new AudioContext();
-    //let audioContext = new OfflineAudioContext()
-    let fileReader   = new FileReader();
-    let gainNode = audioContext.createGain();                        
-    let analyser = audioContext.createAnalyser();
-    analyser.fftSize = 128;
-    analyser.connect(gainNode).connect(audioContext.destination);
-    gainNode.gain.value=0;
-    debi("visualizer").innerHTML+='<canvas id="can_'+o_c+'" class="canvas_css"></canvas>';//
-    let canvas = document.getElementById("can_"+o_c);
-    let canvasContext = canvas.getContext('2d');//2d描写の時に必ずいる
-    canvas.width=analyser.frequencyBinCount * 10;
-       
-    fileReader.readAsArrayBuffer(select_file);
-    let conti_stop=0;
-    let frame_count=0;
-    let render = ()=>{
-        let spectrums = new Uint8Array(analyser.frequencyBinCount);
-        //console.log(spectrums)
-        analyser.getByteFrequencyData(spectrums);
-        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-        for(let j=0, len=spectrums.length; j<len; j++){
-            canvasContext.fillRect(j*10, 0, 5, spectrums[j]);
-            if(spectrums[j]>5){
-                conti_stop++;
-                break;
-            }
-        }
-        if(conti_stop==0){
-            frame_count++;
-            animationId = requestAnimationFrame(render);
-        }
-        else{
-            source.stop();
-            cancelAnimationFrame(animationId);
-            console.log("o_c="+o_c+" frame_count="+frame_count);
-            let sit=frame_count/60;//sound_in_time
-            console.log("sit="+sit);
-            if(sit<0.2){
-                button_array[order_array[o_c]].start=0;
-            }
-            else{
-                button_array[order_array[o_c]].start=sit-0.2;
-            }
-            assign_count--;
-            //console.log("assign_count="+assign_count);
-            assign_data(order_array[o_c]);
-            if(assign_count==0){
-                debi("visualizer").innerHTML="";	
-                seek_alert_off();
-            }
-        }
-    };
+	let source;
+	let animationId;
+	let audioContext = new AudioContext();
+	//let audioContext = new OfflineAudioContext()
+	let fileReader   = new FileReader();
+	let gainNode = audioContext.createGain();                        
+	let analyser = audioContext.createAnalyser();
+	analyser.fftSize = 128;
+	analyser.connect(gainNode).connect(audioContext.destination);
+	gainNode.gain.value=0;
+	debi("visualizer").innerHTML+='<canvas id="can_'+o_c+'" class="canvas_css"></canvas>';//
+	let canvas = document.getElementById("can_"+o_c);
+	//console.log("canvas="+canvas);
+	let canvasContext = canvas.getContext('2d');//2d描写の時に必ずいる
+	canvas.width=analyser.frequencyBinCount * 10;
+	//console.log("canvas.width="+canvas.width);
+	fileReader.readAsArrayBuffer(select_file);
+	let conti_stop=0;
+	//let frame_count=0;
+	let seek_start;
+	let seek_end=0;
+	let render = (timestamp)=>{
+	//console.log("analyser.frequencyBinCount="+analyser.frequencyBinCount);
+		if(seek_start===undefined){
+			seek_start=timestamp;
+			//console.log("seek_start="+seek_start);
+		}
+		let spectrums = new Uint8Array(analyser.frequencyBinCount);
+		analyser.getByteFrequencyData(spectrums);
+		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+		for(let j=0, len=spectrums.length; j<len; j++){
+			canvasContext.fillRect(j*10, 0, 5, spectrums[j]);
+			if(spectrums[j]>5){
+				conti_stop++;
+				break;
+			}
+		}
+		if(conti_stop==0){
+			//timestamp+=timestamp;
+			//console.log("spectrums="+spectrums);
+			//frame_count++;
+			animationId = requestAnimationFrame(render);
+		}
+		else{
+			//console.log("spectrums="+spectrums);
+			source.stop();
+			cancelAnimationFrame(animationId);
+			seek_end=timestamp;
+			//console.log("seek_end="+seek_end);
+			let jikan_sa=seek_end-seek_start;//sound_in_time
+			console.log("o_c="+o_c+" jikan_sa="+jikan_sa);
+			if(jikan_sa<200){
+				button_array[order_array[o_c]].start=0;
+			}
+			else{
+				let start_jikan=jikan_sa%200;
+				if(start_jikan<100){
+					start_jikan+=100;
+				}
+				//console.log("start_jikan/1000="+start_jikan/1000);
+				button_array[order_array[o_c]].start=start_jikan/1000;
+			}
+			assign_count--;
+			//console.log("assign_count="+assign_count);
+			assign_data(order_array[o_c]);
+			if(assign_count==0){
+				debi("visualizer").innerHTML="";	
+				seek_alert_off();
+			}
+		}
+	};
                     
-    fileReader.onload = ()=>{
-        audioContext.decodeAudioData(fileReader.result, function(buffer){
-            if(source) {
-                source.stop();
-                cancelAnimationFrame(animationId);
-            }
-            source = audioContext.createBufferSource();
-            source.buffer = buffer;
-            source.connect(analyser);
-            source.start(0);
-            frame_count++;
-            animationId = requestAnimationFrame(render);
-        });
-    };
-    }
- }
+	fileReader.onload = ()=>{
+		audioContext.decodeAudioData(fileReader.result, function(buffer){
+			if(source) {
+				source.stop();
+				cancelAnimationFrame(animationId);
+			}
+			source = audioContext.createBufferSource();
+			source.buffer = buffer;
+			source.connect(analyser);
+			source.start(0);//原曲をシークするので0;
+			//frame_count++;
+			animationId = requestAnimationFrame(render);
+		});
+	};
+}
 
 var file_id="";
 var con_x;//config
@@ -780,11 +786,11 @@ function play_whr(num){
 function play_end(num){
     if(debi("loop").checked){
         button_array[num].loop=true;
-        debi("mov-"+num).loop=true;
+        //debi("mov-"+num).loop=true;
     }
     else{
         button_array[num].loop=false;
-        debi("mov-"+num).loop=false;
+        //debi("mov-"+num).loop=false;
     }
     button_array[num].content=debi("b-"+num).innerHTML;
 }
@@ -1026,7 +1032,7 @@ function to_end(num){
     if(button_array[num].cue==1){
         debi("mov-"+num).currentTime=0+button_array[num].start;
     }
-    button_array[num].loop=debi("mov-"+num).loop;
+    //button_array[num].loop=debi("mov-"+num).loop;
     button_array[num].begining=debi("mov-"+num).currentTime;
     button_array[num].fading=0;
     reassign(num);
@@ -1040,7 +1046,7 @@ function reassign(num){//stop & reflesh
     debi("mov-"+num).src=button_array[num].url;
     debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
         debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-Math.floor(button_array[num].start)); 
-    debi("mov-"+num).loop=button_array[num].loop;
+    //debi("mov-"+num).loop=button_array[num].loop;
     debi("mov-"+num).currentTime=button_array[num].begining;
     button_array[num].content=debi("b-"+num).innerHTML;
     prepare_button(num);
@@ -1098,13 +1104,23 @@ var fi_time=0;
 function start_to_play(num,fade){
     debi("mov-"+num).addEventListener("ended", ()=>{//num=-1;
         console.log("ended in !");
-        debi("mov-"+num).currentTime=0+button_array[num].start;
-        to_end(num);
+		if(button_array[num].loop==true){
+			debi("mov-"+num).currentTime=0+button_array[num].start;
+			clearInterval(button_array[num].timer)//function name
+			debi("mov-"+num).play();
+			button_array[num].timer=setInterval(()=>{t_ing(num)},100);
+		}
+		else{
+			console.log("ended to_end");
+			to_end(num);
+		}
+        //debi("mov-"+num).currentTime=0+button_array[num].start;
+        //to_end(num);
     });
-    if(fade==1 && debi("fader").value!=0){//引数を受けている not fade_on
+    if(fade==1 && debi("fader").value!=0){//引数を受けている fade_on
         debi("mov-"+num).volume=0;//
 		fi_time=Number(debi("fader").value);
-        button_array[num].fading=2;
+        button_array[num].fading=2;//sound_fade_in(num);
         debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",50%,50%,0.30)";
     }
     if(button_array[num].type.indexOf("audio")>=0){
