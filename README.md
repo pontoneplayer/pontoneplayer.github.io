@@ -4,9 +4,9 @@ PonTONE v1.4.0
 
 Cue Sounds player on WWW Browser
 
-* when sound looped, timer bug fixed.
+* when sound looped, timer bug fixed
 
-* sound vidualizing added.
+* sound vidualizing added
 
 open pontone.html with WWW Browser on PC
 
