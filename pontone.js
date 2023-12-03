@@ -1,4 +1,4 @@
-/*PonTONE v1.3.4*/
+/*PonTONE v1.4.3*/
 
 function debi(id){
 	return document.getElementById(id);
@@ -63,7 +63,7 @@ function buttons_pattern(){
 
 function choice_confirm(num){
     debi("cd-"+num).style.backgroundColor="hsla(0,0%,75%,1.00)";
-    let open_confirm=()=>{
+    //let open_confirm=()=>{
  	let confirm_line='<div class="confirm_lay_div">';
 		confirm_line+='<span style="color:hsla(0,0%,45%,1.00)">';
 			confirm_line+="Your Choice";
@@ -88,9 +88,9 @@ function choice_confirm(num){
 	debi("bgc-"+num).style.width=((6*line_num)+(28*line_num))+"px";
 	debi("bgc-"+num).style.height=((6*(b_num/line_num))+(28*(b_num/line_num)))+"px";
     debi("cd-"+num).style.backgroundColor="";
-    clearTimeout(timer);
-   }
-    let timer=setTimeout(open_confirm,150);
+    //clearTimeout(timer);
+   	//}
+    //let timer=setTimeout(open_confirm,150);
 }
 
 function choice_again(num){
@@ -117,6 +117,7 @@ function myButton(){//button object
     this.url="";
     this.name;
     this.timer;
+	this.visualizer;
     this.volume=0.75;//%
 	this.cue=1;
 	this.loop=false;
@@ -143,9 +144,22 @@ function make_buttons(num1,num2){//num1=all,num2=lines
 		let step=360/num1;
         button_array[i].color=180-step*i;
 		let buttons_line='<div id="b-'+i+'" class="button">';
-                buttons_line+='<div id="movie-'+i+'" class="mv_div">';
+				buttons_line+='<div id="bvd-'+i+'" class="bv_div">';//button vidualize div 0
+                    buttons_line+='<div id="bvd-'+i+'_L" class="bv_div_L">';//button vidualize div L
+                        //buttons_line+='<span>LLLL</span>';
+                        for(let j=0;j<FFT_SIZE/2;j++){
+					        buttons_line+='<div id="box-'+i+'_L-'+j+'" class="box"></div>';
+				        }
+                    buttons_line+='</div>';
+                    buttons_line+='<div id="bvd-'+i+'_R" class="bv_div_R">';//button vidualize div R
+                        //buttons_line+='<span>RRRR</span>';
+                        for(let j=0;j<FFT_SIZE/2;j++){
+					        buttons_line+='<div id="box-'+i+'_R-'+j+'" class="box"></div>';
+				        }
+                    buttons_line+='</div>';
                 buttons_line+='</div>';
-                buttons_line+='<div id="bnd-'+i+'" class="bn_div">';
+                buttons_line+='<div id="movie-'+i+'" class="mv_div"></div>';//movie div 1
+                buttons_line+='<div id="bnd-'+i+'" class="bn_div">';//button number div 2
                     buttons_line+='<span id="bnn-'+i+'" class="b_number_off">';
                     if(i<9){
                         buttons_line+='0'+(i+1);
@@ -153,20 +167,17 @@ function make_buttons(num1,num2){//num1=all,num2=lines
                     else{
                         buttons_line+=(i+1);
                     }
-                buttons_line+='</span>';
-            buttons_line+='</div>';
-            buttons_line+='<div id="btd-'+i+'" class="bt_div">';
-                buttons_line+='<span id="bti-'+i+'" class="b_time_ing">';
-                buttons_line+='</span>';
-                buttons_line+='<span id="bt-'+i+'" class="b_time">';
-                buttons_line+='</span>';
-            buttons_line+='</div>';
-            buttons_line+='<div id="bdd-'+i+'" class="bd_div">';
-                buttons_line+='<span id="bdn-'+i+'" class="d_name">';//<p></p> v1.0.1 fixed
-                buttons_line+='</span>';
-            buttons_line+='</div>';        
-            buttons_line+='<div id="bld-'+i+'" class="b_lay">';
-            buttons_line+='</div>';
+                	buttons_line+='</span>';
+            	buttons_line+='</div>';
+				buttons_line+='<div id="btd-'+i+'" class="bt_div">';//button timer div 3
+                	buttons_line+='<span id="bti-'+i+'" class="b_time_ing"></span>';
+                	buttons_line+='<span id="bt-'+i+'" class="b_time"></span>';
+            	buttons_line+='</div>';
+            	buttons_line+='<div id="bdd-'+i+'" class="bd_div">';//div 4
+                	buttons_line+='<span id="bdn-'+i+'" class="d_name"></span>';
+            	buttons_line+='</div>';        
+            	buttons_line+='<div id="bld-'+i+'" class="b_lay"></div>';//div 5
+
 		buttons_line+='</div>';
 		debi("button_background").innerHTML+=buttons_line;
 		debi("bnn-"+i).style.color="hsla("+button_array[i].color+",0%,100%,1.00)";//white
@@ -198,6 +209,11 @@ function assign_data(num){//new index_number
         debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-Math.floor(button_array[num].start)); 
     debi("mov-"+num).currentTime=button_array[num].start;
     console.log('debi("mov-"+num).currentTime='+debi("mov-"+num).currentTime);
+    for (let i = 0; i < FFT_SIZE/2; i++) {
+        debi("box-"+num+"_L-"+i).style.width = "0px";
+        debi("box-"+num+"_R-"+i).style.width = "0px";
+        //debi("box-"+num+"-"+i).style.height = "0px";
+    }
     prepare_button(num);
     });
 }
@@ -422,13 +438,15 @@ function drop(e){
                                     console.log("o_c="+o_c);
                                     button_array[order_array[o_c]].name=drop_files[i].name;
                                     button_array[order_array[o_c]].type= drop_files[i].type; 
-                                    //button_array[order_array[o_c]].data= drop_files[i]; 
+                                    button_array[order_array[o_c]].data= drop_files[i]; 
 
                                     //let create=drop_files[0];//waiting for srcObject depend on browser
                                     //button_array[Number(file_id.split("-")[1])].data= create;
                                     button_array[order_array[o_c]].url=create;
                                     button_array[order_array[o_c]].loop=false;
                                     //button_array[order_array[o_c]].begining=0;
+                                    //button_array[order_array[o_c]].dblob=drop_files[i];
+                                    //seek_nosound_time(o_c,button_array[order_array[o_c]].dblob);
                                     seek_nosound_time(o_c,drop_files[i]);
                                 }
                                 o_c++;
@@ -515,12 +533,13 @@ function link_data(){
                         console.log("o_c="+o_c);
                         button_array[order_array[o_c]].name=select_files[i].name;
                         button_array[order_array[o_c]].type=select_files[i].type;
-                        //button_array[order_array[o_c]].data=select_files[0];
+                        button_array[order_array[o_c]].data=select_files[i];
                         let create=URL.createObjectURL(select_files[i]);// faster than readAsDataURL()
                         //let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
                         button_array[order_array[o_c]].url=create;
                         button_array[order_array[o_c]].loop=false;
-                        
+                        //button_array[order_array[o_c]].dblob=select_files[i];
+                        //seek_nosound_time(o_c,button_array[order_array[o_c]].dblob);
                         seek_nosound_time(o_c,select_files[i]);
                     }
                     o_c++;
@@ -578,15 +597,17 @@ function seek_nosound_time(o_c,select_file){
 	let fileReader   = new FileReader();
 	let gainNode = audioContext.createGain();                        
 	let analyser = audioContext.createAnalyser();
-	analyser.fftSize = 128;
+	analyser.fftSize = FFT_SIZE;
 	analyser.connect(gainNode).connect(audioContext.destination);
 	gainNode.gain.value=0;
-	debi("visualizer").innerHTML+='<canvas id="can_'+o_c+'" class="canvas_css"></canvas>';//
+    debi("visualizer").innerHTML+='<canvas id="can_'+o_c+'" class="canvas_css"></canvas>';//
 	let canvas = document.getElementById("can_"+o_c);
 	//console.log("canvas="+canvas);
 	let canvasContext = canvas.getContext('2d');//2d描写の時に必ずいる
-	canvas.width=analyser.frequencyBinCount * 10;
-	//console.log("canvas.width="+canvas.width);
+	//canvas.width=analyser.frequencyBinCount*8;//
+	canvas.height=analyser.frequencyBinCount*8;
+	//console.log("canvas.width="+canvas.width+" canvas.height="+canvas.height);
+	//console.log("debi(b-"+o_c+").height="+debi("b-"+o_c).height);
 	fileReader.readAsArrayBuffer(select_file);
 	let conti_stop=0;
 	//let frame_count=0;
@@ -600,16 +621,16 @@ function seek_nosound_time(o_c,select_file){
 		}
 		let spectrums = new Uint8Array(analyser.frequencyBinCount);
 		analyser.getByteFrequencyData(spectrums);
-		canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+		//canvasContext.clearRect(0, 0, 300, 300);
 		for(let j=0, len=spectrums.length; j<len; j++){
-			canvasContext.fillRect(j*10, 0, 5, spectrums[j]);
+			canvasContext.fillRect(j*10, 300, 5, -spectrums[j]);
 			if(spectrums[j]>5){
 				conti_stop++;
 				break;
 			}
 		}
 		if(conti_stop==0){
-			//timestamp+=timestamp;
+			timestamp+=timestamp;
 			//console.log("spectrums="+spectrums);
 			//frame_count++;
 			animationId = requestAnimationFrame(render);
@@ -618,6 +639,7 @@ function seek_nosound_time(o_c,select_file){
 			//console.log("spectrums="+spectrums);
 			source.stop();
 			cancelAnimationFrame(animationId);
+			canvasContext.clearRect(0, 0, 300, 300);
 			seek_end=timestamp;
 			//console.log("seek_end="+seek_end);
 			let jikan_sa=seek_end-seek_start;//sound_in_time
@@ -630,7 +652,8 @@ function seek_nosound_time(o_c,select_file){
 				if(start_jikan<100){
 					start_jikan+=100;
 				}
-				//console.log("start_jikan/1000="+start_jikan/1000);
+                start_jikan=jikan_sa-start_jikan;
+				console.log("start_jikan/1000="+start_jikan/1000);
 				button_array[order_array[o_c]].start=start_jikan/1000;
 			}
 			assign_count--;
@@ -967,90 +990,49 @@ function key_down(event){//
 	}
 }
 
-/*time*/
-function t_ing(num){//time progress
-    let running=debi("mov-"+num).currentTime.toFixed(3)-button_array[num].start.toFixed(3);
-    //console.log("running="+running);
-    let second;
-    if(Math.floor(running/60)==0){
-        running=running.toFixed(1);
+/*sound fade in*/
+var in_time=0;
+function sound_fade_in(num){
+    in_time+=0.1;
+    if(fi_time<=in_time){
+        debi("mov-"+num).volume=button_array[num].volume*m_v/10;
+        debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",0%,100%,0.00)";
+        debi("bld-"+num).innerHTML="";
+        button_array[num].fading=0;
+        in_time=0;
+        fade_on=0;
+		flick_on=0;
+        debi("f_b").style.color="hsla(208,100%,97%,1.00)";
+        debi("f_b_div").style.backgroundColor="hsla(0,0%,67%,1.00)";
+    }
+    else if(in_time<fi_time/2){
+        debi("mov-"+num).volume=(2/Math.pow(fi_time,2))*(Math.pow(in_time,2))*(button_array[num].volume*m_v/10);
+        if(in_time.toFixed(1)*10%2==1){
+            if(out_time==0){
+               f_b_flick();
+            }
+            if(debi("bld-"+num).innerHTML==""){
+                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';//<span style="font-size:20px; color:hsla(0,0%,100%,1.00);">Fading</span>
+            }
+            else{
+                debi("bld-"+num).innerHTML="";
+            }
+        }
     }
     else{
-        if((running-(60*Math.floor(running/60))).toFixed(1)<10){
-            second="0"+(running-(60*Math.floor(running/60))).toFixed(1);
-            running=Math.floor(running/60)+'"'+second;
+        debi("mov-"+num).volume=((-(2/Math.pow(fi_time,2))*Math.pow((in_time-fi_time),2))+1)*(button_array[num].volume*m_v/10);
+        if(in_time.toFixed(1)*10%2==1){
+            if(out_time==0){
+                f_b_flick();
+            }
+            if(debi("bld-"+num).innerHTML==""){
+                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';//<span style="font-size:20px; color:hsla(0,0%,100%,1.00);">Fading</span>
+            }
+            else{
+                debi("bld-"+num).innerHTML="";
+            }
         }
-        else{
-            running=Math.floor(running/60)+'"'+(running-(60*Math.floor(running/60))).toFixed(1);
-        }
     }
-    debi("bti-"+num).innerHTML=running+"/";
-    if(button_array[num].fading==1){
-        sound_fade_out(num);
-    }
-    if(button_array[num].fading==2){
-        sound_fade_in(num);
-    }
-}
-
-function data_duration(num){
-	let remaining;
-	let second;
-	if(Math.floor(num/60)==0){
-		remaining=num.toFixed(1);
-	}
-	else{
-		if((num-(60*Math.floor(num/60))).toFixed(1)<10){
-			second="0"+(num-(60*Math.floor(num/60))).toFixed(1);
-			remaining=Math.floor(num/60)+'"'+second;
-		}
-		else{
-			remaining=Math.floor(num/60)+'"'+(num-(60*Math.floor(num/60))).toFixed(1);
-		}
-	}
-	return remaining;
-}
-
-/*stop to play*/
-var fo_time=0;
-function stop_playing(num){
-    if(fade_on==1 && Number(debi("fader").value!=0)){
-        fo_time=Number(debi("fader").value);
-        button_array[num].fading=1;
-        debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",50%,50%,0.30)";
-    }
-    else{
-        to_end(num);
-    }
-}   
-
-function to_end(num){
-    //console.log("to_end num="+num);
-    clearInterval(button_array[num].timer)//function name
-    //console.log("clear button_array[num].timer-ID="+button_array[num].timer);
-    debi("mov-"+num).pause();
-    if(button_array[num].cue==1){
-        debi("mov-"+num).currentTime=0+button_array[num].start;
-    }
-    //button_array[num].loop=debi("mov-"+num).loop;
-    button_array[num].begining=debi("mov-"+num).currentTime;
-    button_array[num].fading=0;
-    reassign(num);
-    //prepare_button(num);
-    button_array[num].on=0;
-}
-
-function reassign(num){//stop & reflesh
-    //console.log("assign_data()")
-    debi("movie-"+num).innerHTML='<video id="mov-'+num+'" height="0px" width="0px"></video>';
-    debi("mov-"+num).src=button_array[num].url;
-    debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
-        debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-Math.floor(button_array[num].start)); 
-    //debi("mov-"+num).loop=button_array[num].loop;
-    debi("mov-"+num).currentTime=button_array[num].begining;
-    button_array[num].content=debi("b-"+num).innerHTML;
-    prepare_button(num);
-    });
 }
 
 /*sound fade out*/
@@ -1099,23 +1081,113 @@ function sound_fade_out(num){
     }
 }
 
+/*time*/
+function t_ing(num){//time progress
+    let running=debi("mov-"+num).currentTime.toFixed(3)-button_array[num].start.toFixed(3);
+    //console.log("running="+running);
+    let second;
+    if(Math.floor(running/60)==0){
+        running=running.toFixed(1);
+    }
+    else{
+        if((running-(60*Math.floor(running/60))).toFixed(1)<10){
+            second="0"+(running-(60*Math.floor(running/60))).toFixed(1);
+            running=Math.floor(running/60)+'"'+second;
+        }
+        else{
+            running=Math.floor(running/60)+'"'+(running-(60*Math.floor(running/60))).toFixed(1);
+        }
+    }
+    debi("bti-"+num).innerHTML=running+"/";
+    if(button_array[num].fading==1){
+        sound_fade_out(num);
+    }
+    if(button_array[num].fading==2){
+        sound_fade_in(num);
+    }
+}
+
 /*start to play*/
+console.log("start to play");
 var fi_time=0;
+//var audioElement;
+const FFT_SIZE = 64;
 function start_to_play(num,fade){
+    let audioElement;
+    //let context;
+    let nodeAnalyser_L;
+    let nodeAnalyser_R;
+ 	//let nodeSource;
+    //let stereoPanner_L;
+    //let stereoPanner_R;
+    //let Channel_L;
+    //let Channel_R;
+	let graph_ing=()=>{
+        if(audioElement==undefined){
+		    audioElement = debi("mov-"+num);
+            const context = new AudioContext();
+            const nodeSource = context.createMediaElementSource(audioElement);//
+            nodeSource.connect(context.destination);
+            const splitter_L = context.createChannelSplitter(2);
+            const merger_L = context.createChannelMerger(2);
+            const splitter_R = context.createChannelSplitter(2);
+            const merger_R = context.createChannelMerger(2);
+            nodeAnalyser_L = context.createAnalyser();
+            nodeAnalyser_R = context.createAnalyser();
+            nodeAnalyser_L.fftSize = FFT_SIZE;
+            nodeAnalyser_R.fftSize = FFT_SIZE;
+            // 0～1の範囲でデータの動きの速さ 0だともっとも速く、1に近づくほど遅くなる
+            nodeAnalyser_L.smoothingTimeConstant = 0.75;
+            nodeAnalyser_R.smoothingTimeConstant = 0.75;
+            nodeSource.connect(splitter_L).connect(merger_L, 0, 0).connect(nodeAnalyser_L);
+            nodeSource.connect(splitter_R).connect(merger_R, 1, 1).connect(nodeAnalyser_R);
+        }
+        visloop();
+	}
+
+	let visloop=()=>{
+		button_array[num].visualizer=requestAnimationFrame(visloop);
+		// 波形データを格納する配列の生成
+		const freqByteData_L = new Uint8Array(FFT_SIZE / 2);
+		const freqByteData_R = new Uint8Array(FFT_SIZE / 2);
+		// それぞれの周波数の振幅を取得
+		nodeAnalyser_L.getByteFrequencyData(freqByteData_L);
+		nodeAnalyser_R.getByteFrequencyData(freqByteData_R);
+		// 高さの更新
+		for (let i = 0; i < freqByteData_L.length; i++) {
+			const freqSum_L = freqByteData_L[i];
+			const freqSum_R = freqByteData_R[i];
+            // 値は256段階で取得できるので正規化して 0.0 〜 1.0 の値にする
+            const scale_L = freqSum_L / 256;
+            const scale_R = freqSum_R / 256;
+            // Y軸のスケールを変更
+			debi("box-"+num+"_L-"+i).style.background=debi("btd-"+num).style.backgroundColor;
+			debi("box-"+num+"_R-"+i).style.background=debi("btd-"+num).style.backgroundColor;
+			debi("box-"+num+"_L-"+i).style.width = (50*scale_L)+"px";
+			debi("box-"+num+"_R-"+i).style.width = (50*scale_R)+"px";
+            //debi("box-"+num+"_L-"+i).style.scale = `${scale} 1`;
+            //debi("box-"+num+"-"+i).style.scale = `1 ${scale}`;
+			//debi("box-"+num+"-"+i).style.height = (75*scale)+"px";
+		}
+	}
+
     debi("mov-"+num).addEventListener("ended", ()=>{//num=-1;
-        console.log("ended in !");
+		console.log("ended in !");
+        console.log("button_array["+num+"].loop="+button_array[num].loop);
 		if(button_array[num].loop==true){
-			debi("mov-"+num).currentTime=0+button_array[num].start;
+            debi("mov-"+num).currentTime=0+button_array[num].start;
+            cancelAnimationFrame(button_array[num].visualizer);
 			clearInterval(button_array[num].timer)//function name
+            debi("mov-"+num).volume=button_array[num].volume*m_v/10
+            console.log("check");
 			debi("mov-"+num).play();
+			debi("mov-"+num).addEventListener("play", graph_ing);
 			button_array[num].timer=setInterval(()=>{t_ing(num)},100);
 		}
 		else{
 			console.log("ended to_end");
 			to_end(num);
 		}
-        //debi("mov-"+num).currentTime=0+button_array[num].start;
-        //to_end(num);
     });
     if(fade==1 && debi("fader").value!=0){//引数を受けている fade_on
         debi("mov-"+num).volume=0;//
@@ -1125,6 +1197,7 @@ function start_to_play(num,fade){
     }
     if(button_array[num].type.indexOf("audio")>=0){
         debi("mov-"+num).play();
+    	debi("mov-"+num).addEventListener("play", graph_ing);
         button_array[num].on=1;
     }
     else{
@@ -1143,49 +1216,81 @@ function start_to_play(num,fade){
     waiting_num=-1;
 }   
 
-/*sound fade in*/
-var in_time=0;
-function sound_fade_in(num){
-    in_time+=0.1;
-    if(fi_time<=in_time){
-        debi("mov-"+num).volume=button_array[num].volume*m_v/10;
-        debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",0%,100%,0.00)";
-        debi("bld-"+num).innerHTML="";
-        button_array[num].fading=0;
-        in_time=0;
-        fade_on=0;
-		flick_on=0;
-        debi("f_b").style.color="hsla(208,100%,97%,1.00)";
-        debi("f_b_div").style.backgroundColor="hsla(0,0%,67%,1.00)";
+/*stop to play*/
+var fo_time=0;
+function stop_playing(num){
+    if(fade_on==1 && Number(debi("fader").value!=0)){
+        fo_time=Number(debi("fader").value);
+        button_array[num].fading=1;
+        debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",50%,50%,0.30)";
     }
-    else if(in_time<fi_time/2){
-        debi("mov-"+num).volume=(2/Math.pow(fi_time,2))*(Math.pow(in_time,2))*(button_array[num].volume*m_v/10);
-        if(in_time.toFixed(1)*10%2==1){
-            if(out_time==0){
-               f_b_flick();
-            }
-            if(debi("bld-"+num).innerHTML==""){
-                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';//<span style="font-size:20px; color:hsla(0,0%,100%,1.00);">Fading</span>
-            }
-            else{
-                debi("bld-"+num).innerHTML="";
-            }
+    else{
+        to_end(num);
+    }
+}   
+
+function to_end(num){
+    //console.log("to_end num="+num);
+    debi("mov-"+num).pause();
+    clearInterval(button_array[num].timer)//function name
+	cancelAnimationFrame(button_array[num].visualizer);
+    //console.log("clear button_array[num].timer-ID="+button_array[num].timer);
+    if(button_array[num].cue==1){
+        debi("mov-"+num).currentTime=0+button_array[num].start;
+        for (let i = 0; i < FFT_SIZE/2; i++) {
+            debi("box-"+num+"_L-"+i).style.width = "0px";
+            debi("box-"+num+"_R-"+i).style.width = "0px";
+            //debi("box-"+num+"-"+i).style.height = "0px";
         }
     }
     else{
-        debi("mov-"+num).volume=((-(2/Math.pow(fi_time,2))*Math.pow((in_time-fi_time),2))+1)*(button_array[num].volume*m_v/10);
-        if(in_time.toFixed(1)*10%2==1){
-            if(out_time==0){
-                f_b_flick();
-            }
-            if(debi("bld-"+num).innerHTML==""){
-                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';//<span style="font-size:20px; color:hsla(0,0%,100%,1.00);">Fading</span>
-            }
-            else{
-                debi("bld-"+num).innerHTML="";
+        console.log("debi(mov-"+num+").currentTime="+debi("mov-"+num).currentTime);
+        console.log("debi(mov-"+num+").duration="+debi("mov-"+num).duration);
+        if(debi("mov-"+num).currentTime==debi("mov-"+num).duration){
+            debi("mov-"+num).currentTime=0+button_array[num].start;
+            for (let i = 0; i < FFT_SIZE/2; i++) {
+                debi("box-"+num+"_L-"+i).style.width = "0px";
+                debi("box-"+num+"_R-"+i).style.width = "0px";
+                //debi("box-"+num+"-"+i).style.height = "0px";
             }
         }
     }
+    //button_array[num].loop=debi("mov-"+num).loop;
+    button_array[num].begining=debi("mov-"+num).currentTime;//生time
+    button_array[num].fading=0;
+    reassign(num);
+    button_array[num].on=0;
+}
+
+function reassign(num){//stop & reflesh
+    //console.log("assign_data()")
+    debi("movie-"+num).innerHTML='<video id="mov-'+num+'" height="0px" width="0px"></video>';
+    debi("mov-"+num).src=button_array[num].url;
+    debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
+        debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-Math.floor(button_array[num].start)); 
+    //debi("mov-"+num).loop=button_array[num].loop;
+    debi("mov-"+num).currentTime=button_array[num].begining;
+    button_array[num].content=debi("b-"+num).innerHTML;
+    prepare_button(num);
+    });
+}
+
+function data_duration(num){
+	let remaining;
+	let second;
+	if(Math.floor(num/60)==0){
+		remaining=num.toFixed(1);
+	}
+	else{
+		if((num-(60*Math.floor(num/60))).toFixed(1)<10){
+			second="0"+(num-(60*Math.floor(num/60))).toFixed(1);
+			remaining=Math.floor(num/60)+'"'+second;
+		}
+		else{
+			remaining=Math.floor(num/60)+'"'+(num-(60*Math.floor(num/60))).toFixed(1);
+		}
+	}
+	return remaining;
 }
 
 /*change color*/
