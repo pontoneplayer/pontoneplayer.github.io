@@ -2,7 +2,7 @@
 
 PonTONE v1.4.0
 
-Cue Sounds player on web browser
+cue sound player on web browser
 
 * when sound looped, timer bug fixed
 
