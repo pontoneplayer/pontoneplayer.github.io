@@ -1,12 +1,14 @@
 # pontoneplayer.github.io
 
-PonTONE v1.4.0
+PonTONE v1.4.1
 
 cue sound player on web browser
 
-* when sound looped, timer bug fixed
+* some bugs fixed
 
-* sound vidualizing added
+* on Chrome, Edge, Firefox confirmed work 
+
+* on Safari, stopped to work 
 
 open pontone.html with web browser on PC
 
