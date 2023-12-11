@@ -1,5 +1,4 @@
-/*PonTONE v1.4.0*/
-
+/*PonTONE v1.4.1*/
 function debi(id){
 	return document.getElementById(id);
 }
@@ -301,12 +300,14 @@ function drag_start(e){// only on browser
 
 document.onmouseover=mouse_over
 function mouse_over(e){
+    // no func
     e.stopPropagation();
     e.preventDefault();
 }
 
 document.ondragenter=drag_enter;
 function drag_enter(e){
+    // no func
     e.stopPropagation();
     e.preventDefault();
 }
@@ -465,8 +466,8 @@ function drop(e){
                 }   
                 else{
                     alert("Sorry no data");
-                    //e.stopPropagation();
-                    //e.preventDefault();
+                    e.stopPropagation();
+                    e.preventDefault();
                 }
             }
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
@@ -479,8 +480,8 @@ function drop(e){
             }
         }
         else{
-            //e.stopPropagation();
-            //e.preventDefault();
+            e.stopPropagation();
+            e.preventDefault();
         }
     }
     e.stopPropagation();
@@ -525,9 +526,11 @@ function link_data(){
         else{
             assign_count=repeat_count=order_array.length-o_c;
         }
+        console.log("seek_alert_on");
         seek_alert_on();
         for (let i=0;i<repeat_count;i++){
             if(select_files[i]){
+                //console.log("select_files true");
                 if(select_files[i].type.indexOf("audio")>=0){
                     if(button_array[order_array[o_c]]){
                         console.log("o_c="+o_c);
@@ -540,6 +543,7 @@ function link_data(){
                         button_array[order_array[o_c]].loop=false;
                         //button_array[order_array[o_c]].dblob=select_files[i];
                         //seek_nosound_time(o_c,button_array[order_array[o_c]].dblob);
+                        console.log("seek_nosound_time");
                         seek_nosound_time(o_c,select_files[i]);
                     }
                     o_c++;
@@ -590,6 +594,7 @@ function seek_alert_off(){
 }
 
 function seek_nosound_time(o_c,select_file){
+	//console.log("select_file="+select_file);
 	let source;
 	let animationId;
 	let audioContext = new AudioContext();
@@ -600,12 +605,12 @@ function seek_nosound_time(o_c,select_file){
 	analyser.fftSize = FFT_SIZE;
 	analyser.connect(gainNode).connect(audioContext.destination);
 	gainNode.gain.value=0;
-    debi("visualizer").innerHTML+='<canvas id="can_'+o_c+'" class="canvas_css"></canvas>';//
-	let canvas = document.getElementById("can_"+o_c);
+    //debi("visualizer").innerHTML+='<canvas id="can_'+o_c+'" class="canvas_css"></canvas>';//
+	//let canvas = document.getElementById("can_"+o_c);
 	//console.log("canvas="+canvas);
-	let canvasContext = canvas.getContext('2d');//2d描写の時に必ずいる
+	//let canvasContext = canvas.getContext('2d');//2d描写の時に必ずいる
 	//canvas.width=analyser.frequencyBinCount*8;//
-	canvas.height=analyser.frequencyBinCount*8;
+	//canvas.height=analyser.frequencyBinCount*8;
 	//console.log("canvas.width="+canvas.width+" canvas.height="+canvas.height);
 	//console.log("debi(b-"+o_c+").height="+debi("b-"+o_c).height);
 	fileReader.readAsArrayBuffer(select_file);
@@ -623,7 +628,7 @@ function seek_nosound_time(o_c,select_file){
 		analyser.getByteFrequencyData(spectrums);
 		//canvasContext.clearRect(0, 0, 300, 300);
 		for(let j=0, len=spectrums.length; j<len; j++){
-			canvasContext.fillRect(j*10, 300, 5, -spectrums[j]);
+			//canvasContext.fillRect(j*10, 300, 5, -spectrums[j]);
 			if(spectrums[j]>5){
 				conti_stop++;
 				break;
@@ -639,7 +644,7 @@ function seek_nosound_time(o_c,select_file){
 			//console.log("spectrums="+spectrums);
 			source.stop();
 			cancelAnimationFrame(animationId);
-			canvasContext.clearRect(0, 0, 300, 300);
+			//canvasContext.clearRect(0, 0, 300, 300);
 			seek_end=timestamp;
 			//console.log("seek_end="+seek_end);
 			let jikan_sa=seek_end-seek_start;//sound_in_time
@@ -664,7 +669,7 @@ function seek_nosound_time(o_c,select_file){
 				seek_alert_off();
 			}
 		}
-	};
+	}
                     
 	fileReader.onload = ()=>{
 		audioContext.decodeAudioData(fileReader.result, function(buffer){
@@ -685,20 +690,47 @@ function seek_nosound_time(o_c,select_file){
 var file_id="";
 var con_x;//config
 var con_y;
-document.oncontextmenu =(e)=>{//right click safari ???
+
+function double_tap(e){
     if(e.target.id){
         if(e.target.id.indexOf("bld-")>=0){
 			file_id=e.target.id;
 			let num=Number(e.target.id.split("-")[1]);
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
-                if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
-                    //console.log(window.navigator.userAgent.toLowerCase());
-                    alert('sorry safari assigns by only drag & drop');
+                console.log("right click file_id="+file_id);
+                if(debi("selected_data")){
+                    //console.log("debi(selected_data) true");
+                    let config_page='<div class="right_click_lay_div_safari">';
+                        config_page+='<span class="break_words">';
+                            config_page+=debi("bnn-"+num).innerHTML;
+                        config_page+='</span>';
+                        config_page+='<input type="button" id="b_change" class="size_13" value="Assaign" onClick="change_data()">';
+                        config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="close_r_click()">';
+                    config_page+='</div>';
+                    //console.log("config_page="+config_page);
+                    debi("right_click_lay").innerHTML=config_page;
+                    debi("right_click_background").style.display='block';
+                    debi("right_click_lay").style.display='flex';
+                    if(window.innerWidth-(e.pageX+50)<debi("right_click_lay").clientWidth){
+                        con_x=window.innerWidth-(debi("right_click_lay").clientWidth);
+                    }
+                    else{
+                        con_x=e.pageX+50;
+                    }
+                    if(window.innerHeight-e.pageY<40){
+                        con_y=window.innerHeight-40;
+                    }
+                    else if(e.pageY-80<0){
+                        con_y=0;					   
+                    }
+                    else{
+                        con_y=e.pageY-120;
+                    }   
+                    debi("right_click_lay").style.left=con_x+"px";
+                    debi("right_click_lay").style.top=con_y+"px";			
+                    trans_check=0;
+                    console.log("never go to button_trans");
                 }
-                else{
-                    debi("selected_data").click();// onchange="link_data()"
-                }
-                return false;
 			}
             else{
 				let config_page='<div class="right_click_lay_div">';
@@ -763,7 +795,7 @@ document.oncontextmenu =(e)=>{//right click safari ???
                 trans_check=0;
 				console.log("never go to button_trans");
 				//console.log("trans_check="+trans_check);
-				return false;
+				//return false;
             }
         }
         else{
@@ -771,13 +803,158 @@ document.oncontextmenu =(e)=>{//right click safari ???
             //console.log("clearTimeout-ID="+long_down);
             trans_check=0;
             console.log("trans_check="+trans_check);
-            return false;
+            //return false;
+        }
+    }
+    else{
+        console.log("no target");
+    }
+    //clearTimeout(long_down);
+    //console.log("clearTimeout-ID="+long_down);
+    trans_check=0;
+    //return false;
+}
+
+var touchStartTime;
+var touchEndTime;
+var tapCount = 0;
+
+document.addEventListener('touchstart', function(e) {
+    e.stopPropagation();
+    //e.preventDefault();
+    //stopImmediatePropagation()
+    touchStartTime = Date.now();
+});
+
+document.addEventListener('touchend', function(e) {
+    e.stopPropagation();
+    //e.preventDefault();
+    //stopImmediatePropagation()
+    touchEndTime = Date.now();
+    if (touchEndTime - touchStartTime < 300) {
+        tapCount++;
+        if (tapCount === 2) {
+            if (touchEndTime - touchStartTime < 1000) {
+                console.log('ダブルタップ');
+                double_tap(e);
+                tapCount = 0;
+            }
+        }
+    } 
+    else {
+        tapCount = 0;
+    }
+});
+
+document.addEventListener('touchcancel', function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    //stopImmediatePropagation()
+    tapCount = 0;
+});
+
+document.oncontextmenu =(e)=>{//right click safari ???
+    e.stopPropagation();
+    e.preventDefault();
+    //migi_click(e);
+
+    if(e.target.id){
+        if(e.target.id.indexOf("bld-")>=0){
+			file_id=e.target.id;
+			let num=Number(e.target.id.split("-")[1]);
+            if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
+                if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+                    console.log(window.navigator.userAgent.toLowerCase());
+                    //alert('sorry safari assigns by only drag & drop');
+                    double_tap(e);
+                }
+                else{
+                    if(debi("selected_data")){
+                        console.log("debi(selected_data) true");
+                        debi("selected_data").click();// onchange="link_data()"
+                    }
+                }
+                //return false;
+			}
+            else{
+				let config_page='<div class="right_click_lay_div">';
+					config_page+='<span class="break_words">';
+						config_page+=debi("bdn-"+num).innerHTML;
+					config_page+='</span>';
+					config_page+='<div class="e-v_div_style">';
+						config_page+='<div class="e-v-line_div_style">';
+							config_page+='<span id="EV">Volume</span>';
+							config_page+='<span id="each_qty">0.0</span>';
+						config_page+='</div>';
+                        config_page+='<input type="range" id="each" class="each" min="0" max="10" step="0.5" onchange="slide_each('+num+')">';
+					config_page+='</div>';
+                    config_page+='<div class="e-v-line_div_style">';
+                        config_page+='<label>';
+                            config_page+='<input type="radio" name="play" value="1" id="play_whr0" checked onchange="play_whr('+num+')">Cue';//where
+                        config_page+='</label>';
+                        config_page+='<label>';
+                            config_page+='<input type="radio" name="play" value="0" id="play_whr1" onchange="play_whr('+num+')">Continue';
+                        config_page+='</label>';
+                    config_page+='</div>';
+                    config_page+='<label>';
+                        config_page+='<input type="checkbox" name="loop" value="0" id="loop" onchange="play_end('+num+')">Loop';
+                    config_page+='</label>';
+                if(debi("mov-"+num).paused){
+					config_page+='<input type="button" id="b_change" class="size_13" value="Change" onClick="change_data()">';
+					config_page+='<input type="button" id="b_clear" class="size_13" value="Clear" 	onClick="clear_confirm('+num+')">';
+                }
+				config_page+='<input type="button" id="b_clear" class="size_13" value="Close" onClick="close_r_click()">';
+				config_page+='</div>';
+				debi("right_click_lay").innerHTML=config_page;
+				debi("right_click_background").style.display='block';
+				debi("right_click_lay").style.display='flex';
+				if(window.innerWidth-(e.pageX+50)<debi("right_click_lay").clientWidth){
+					con_x=window.innerWidth-(debi("right_click_lay").clientWidth);
+				}
+				else{
+					con_x=e.pageX+50;
+				}
+				if(window.innerHeight-e.pageY<40){
+					con_y=window.innerHeight-40;
+				}
+				else if(e.pageY-200<0){
+					con_y=0;					   
+				}
+				else{
+					con_y=e.pageY-200;
+				}
+				debi("right_click_lay").style.left=con_x+"px";
+				debi("right_click_lay").style.top=con_y+"px";			
+				if(button_array[num].cue==1){
+					debi("play_whr0").checked=true;   
+				}
+				else{
+					debi("play_whr1").checked=true;
+				}
+				debi("loop").checked=button_array[num].loop;
+				//console.log("debi(loop).checked="+debi("loop").checked);
+				debi("each").value=debi("each_qty").innerHTML=(button_array[num].volume*10).toFixed(1);
+				//clearTimeout(long_down);
+				//console.log("clearTimeout-ID="+long_down);
+                trans_check=0;
+				console.log("never go to button_trans");
+				//console.log("trans_check="+trans_check);
+				//return false;
+            }
+        }
+        else{
+            //clearTimeout(long_down);
+            //console.log("clearTimeout-ID="+long_down);
+            trans_check=0;
+            console.log("trans_check="+trans_check);
+            //return false;
         }
     }
     //clearTimeout(long_down);
     //console.log("clearTimeout-ID="+long_down);
     trans_check=0;
-    return false;
+    //return false;
+
 };
 
 function slide_each(num){
@@ -879,7 +1056,7 @@ function close_r_click(){
 /*button pad click*/
 var array_num=-1
 var waiting_num=-1;
-let trans_check=0;
+var trans_check=0;
 //let long_down;
 document.addEventListener('click', (e)=>{
     if(e.target.id){
@@ -899,6 +1076,11 @@ document.addEventListener('click', (e)=>{
         }
     }
 });
+
+// ダブルタップの間隔をリセットします
+setInterval(() => {
+    tapCount = 0;
+}, 300); //
 
 function play_check(num){
 	if(debi("movie-"+num).innerHTML!=""){
@@ -986,7 +1168,7 @@ function key_down(event){//
 				break;
 			}
 		}
-		return false;
+		//return false;
 	}
 }
 
@@ -1142,11 +1324,12 @@ function start_to_play(num,fade){
             nodeSource.connect(splitter_L).connect(merger_L, 0, 0).connect(nodeAnalyser_L);
             nodeSource.connect(splitter_R).connect(merger_R, 1, 1).connect(nodeAnalyser_R);
         }
-        visloop();
+		button_array[num].visualizer=requestAnimationFrame(visloop);
+        //visloop();
 	}
 
 	let visloop=()=>{
-		button_array[num].visualizer=requestAnimationFrame(visloop);
+		//button_array[num].visualizer=requestAnimationFrame(visloop);
 		// 波形データを格納する配列の生成
 		const freqByteData_L = new Uint8Array(FFT_SIZE / 2);
 		const freqByteData_R = new Uint8Array(FFT_SIZE / 2);
@@ -1168,6 +1351,7 @@ function start_to_play(num,fade){
             //debi("box-"+num+"_L-"+i).style.scale = `${scale} 1`;
             //debi("box-"+num+"-"+i).style.scale = `1 ${scale}`;
 			//debi("box-"+num+"-"+i).style.height = (75*scale)+"px";
+            //console.log("freqByteData = "+i);
 		}
 	}
 
@@ -1362,7 +1546,7 @@ document.addEventListener('dblclick', (e)=>{
                     debi("fader_div").style.display="none";
                 }
                 else{
-                    return false;
+                    //return false;
                 }
             }
         }*/
@@ -1387,13 +1571,13 @@ document.addEventListener('dblclick', (e)=>{
             }
         }
         else{
-            return false;
+            //return false;
         }
     }
     else{
-        return false;
+        //return false;
     }
-    return false;
+    //return false;
 });
 
 var fade_on=0;

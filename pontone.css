@@ -1,5 +1,5 @@
 @charset "UTF-8";
-/*PonTONE v1.4.0*/
+/*PonTONE v1.4.1*/
 /* CSS Document */
 body{
     position: relative;
@@ -8,7 +8,6 @@ body{
     align-items: flex-start;
     background-color:hsla(0,0%,20%,1.00);
     font-family: sans-serif;
-	/*color:white;*/
 }
 
 .main{
@@ -150,7 +149,9 @@ body{
 	height:80px;
  	border-radius: 5px;
 	background-color:hsla(0,0%,100%,0.00);
-}/* 子 */
+}
+
+/* 子 */
 .box {
 	flex: 1;
 	/*height:50px;*/
@@ -412,6 +413,15 @@ body{
 	height:320px;
 	width:160px;
 	flex-direction: column;
+	align-items: center;
+	justify-content: space-around;
+}
+.right_click_lay_div_safari{
+	display:flex;
+	height:120px;
+	width:160px;
+	flex-direction: column;
+	align-content:center;
 	align-items: center;
 	justify-content: space-around;
 }
