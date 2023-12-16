@@ -1,4 +1,4 @@
-/*PonTONE v1.4.1*/
+/*PonTONE v1.4.2*/
 function debi(id){
 	return document.getElementById(id);
 }
@@ -62,7 +62,6 @@ function buttons_pattern(){
 
 function choice_confirm(num){
     debi("cd-"+num).style.backgroundColor="hsla(0,0%,75%,1.00)";
-    //let open_confirm=()=>{
  	let confirm_line='<div class="confirm_lay_div">';
 		confirm_line+='<span style="color:hsla(0,0%,45%,1.00)">';
 			confirm_line+="Your Choice";
@@ -87,9 +86,6 @@ function choice_confirm(num){
 	debi("bgc-"+num).style.width=((6*line_num)+(28*line_num))+"px";
 	debi("bgc-"+num).style.height=((6*(b_num/line_num))+(28*(b_num/line_num)))+"px";
     debi("cd-"+num).style.backgroundColor="";
-    //clearTimeout(timer);
-   	//}
-    //let timer=setTimeout(open_confirm,150);
 }
 
 function choice_again(num){
@@ -118,6 +114,7 @@ function myButton(){//button object
     this.timer;
 	this.visualizer;
     this.volume=0.75;//%
+	this.gainNode;
 	this.cue=1;
 	this.loop=false;
     this.begining=0;
@@ -145,13 +142,11 @@ function make_buttons(num1,num2){//num1=all,num2=lines
 		let buttons_line='<div id="b-'+i+'" class="button">';
 				buttons_line+='<div id="bvd-'+i+'" class="bv_div">';//button vidualize div 0
                     buttons_line+='<div id="bvd-'+i+'_L" class="bv_div_L">';//button vidualize div L
-                        //buttons_line+='<span>LLLL</span>';
                         for(let j=0;j<FFT_SIZE/2;j++){
 					        buttons_line+='<div id="box-'+i+'_L-'+j+'" class="box"></div>';
 				        }
                     buttons_line+='</div>';
                     buttons_line+='<div id="bvd-'+i+'_R" class="bv_div_R">';//button vidualize div R
-                        //buttons_line+='<span>RRRR</span>';
                         for(let j=0;j<FFT_SIZE/2;j++){
 					        buttons_line+='<div id="box-'+i+'_R-'+j+'" class="box"></div>';
 				        }
@@ -193,7 +188,6 @@ function make_buttons(num1,num2){//num1=all,num2=lines
     debi("button_background").innerHTML+='<div id="dummy" class="button">';
     debi("button_background").innerHTML+='</div>'
     debi("dummy").style.display="none";
-    //debi("dummy").style.visibility="hidden";
     debi("button_background").style.width=(num2*100+num2*20)+"px";
     debi("button_background").style.height=((num1/num2)*100+(num1/num2)*20)+"px";
 	//sub_win=open("movie.html","Display Window",window_options);
@@ -206,14 +200,12 @@ function assign_data(num){//new index_number
     debi("mov-"+num).src=button_array[num].url;
     debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
         debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-Math.floor(button_array[num].start)); 
-    debi("mov-"+num).currentTime=button_array[num].start;
-    console.log('debi("mov-"+num).currentTime='+debi("mov-"+num).currentTime);
-    for (let i = 0; i < FFT_SIZE/2; i++) {
-        debi("box-"+num+"_L-"+i).style.width = "0px";
-        debi("box-"+num+"_R-"+i).style.width = "0px";
-        //debi("box-"+num+"-"+i).style.height = "0px";
-    }
-    prepare_button(num);
+        debi("mov-"+num).currentTime=button_array[num].start;
+        for (let i = 0; i < FFT_SIZE/2; i++) {
+            debi("box-"+num+"_L-"+i).style.width = "0px";
+            debi("box-"+num+"_R-"+i).style.width = "0px";
+        }
+        prepare_button(num);
     });
 }
 
@@ -256,7 +248,7 @@ document.addEventListener("mousedown", (e)=>{//fader_div
 
 var x=0;
 var y=0;
-function button_trans(num){
+function button_trans(num){//delete ?
     /*debi("dummy").style.display="flex";
     debi("dummy").style.order=button_array[num].order;
     debi("dummy").style.visibility="hidden";
@@ -312,7 +304,6 @@ function drag_enter(e){
     e.preventDefault();
 }
 
-//document.ondrag=drag_move;//FireFox not yet
 document.ondragover=drag_move;
 function drag_move(e){
     if(drag_ele!=""){
@@ -398,6 +389,8 @@ function drag_move(e){
 	e.preventDefault();
 }
 
+var file_array=[];
+
 document.ondrop=drop;
 function drop(e){
     console.log("drop drag_ele.id="+drag_ele.id);
@@ -416,66 +409,55 @@ function drop(e){
         if(e.target.id.indexOf("bld-")>=0){
             file_id=e.target.id;
             let drop_func=()=>{
-                const drop_files = e.dataTransfer.files;//array
-                if(drop_files){
-					let num=Number(file_id.split("-")[1]);
-					let alert_count=0;
+                file_array = e.dataTransfer.files;//array
+                if(file_array){
+					let num=Number(file_id.split("-")[1]);//e.target.id?
+					//let alert_count=0;
                     let o_c=button_array[num].order;//order_count
-                    let repeat_count;
-                    if((order_array.length-o_c)>=drop_files.length){
-                        assign_count=repeat_count=drop_files.length;
+                    //let repeat_count;
+                    if((order_array.length-o_c)>=file_array.length){
+                        assign_count=file_array.length;
                         //console.log("if video_check_count="+video_check_count);
                     }
                     else{
-                        assign_count=repeat_count=order_array.length-o_c;
+                        assign_count=order_array.length-o_c;
                         //console.log("else video_check_count="+video_check_count);
                     }
-                    seek_alert_on();
-					for(let i=0;i<repeat_count;i++){
-                        if(drop_files[i]){
-                            if(drop_files[i].type.indexOf("audio")>=0){
-                                let create=URL.createObjectURL(drop_files[i]);// faster than readAsDataURL()                                //let o_c=button_array[num].order+i;
-                                if(button_array[order_array[o_c]]){
-                                    console.log("o_c="+o_c);
-                                    button_array[order_array[o_c]].name=drop_files[i].name;
-                                    button_array[order_array[o_c]].type= drop_files[i].type; 
-                                    button_array[order_array[o_c]].data= drop_files[i]; 
-
-                                    //let create=drop_files[0];//waiting for srcObject depend on browser
-                                    //button_array[Number(file_id.split("-")[1])].data= create;
-                                    button_array[order_array[o_c]].url=create;
-                                    button_array[order_array[o_c]].loop=false;
-                                    //button_array[order_array[o_c]].begining=0;
-                                    //button_array[order_array[o_c]].dblob=drop_files[i];
-                                    //seek_nosound_time(o_c,button_array[order_array[o_c]].dblob);
-                                    seek_nosound_time(o_c,drop_files[i]);
-                                }
-                                o_c++;
+                    if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+                        console.log(window.navigator.userAgent.toLowerCase());
+                        let config_page='<div class="right_click_lay_div_safari">';
+                            if(assign_count==1){
+                                config_page+=debi("bnn-"+num).innerHTML;
                             }
                             else{
-                                alert_count++;
+                                config_page+=debi("bnn-"+num).innerHTML+"  to  "+((Number(debi("bnn-"+num).innerHTML)+assign_count-1)+"").padStart(2, '0');
                             }
-                        }
+                        
+                            config_page+='<input type="button" id="b_change" class="size_13" value="Seek Sounds" onClick="throw_to_seek()">';
+                            config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="choice_again()">';
+                        config_page+='</div>';
+                        debi("confirm_lay").innerHTML=config_page;
+                        debi("confirm_lay_background").style.display='flex';
+                        debi("confirm_lay").style.display='block';
                     }
-					if(alert_count==1){
-						alert("Sorry "+alert_count+" file no sound data");
-					}
-					else if(alert_count>1){
-						alert("Sorry "+alert_count+" files no sound data");
-					}
+                    else{
+                        throw_to_seek();
+                    }
                 }   
                 else{
                     alert("Sorry no data");
-                    e.stopPropagation();
-                    e.preventDefault();
                 }
             }
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
                 drop_func();
+                e.stopPropagation();
+                e.preventDefault();
             }
             else{
                 if(debi("mov-"+e.target.id.split("-")[1]).paused){
                     drop_func();
+                    e.stopPropagation();
+                    e.preventDefault();
                 }
             }
         }
@@ -494,8 +476,8 @@ function drop_mup(e){
     debi("b-"+num).style.zIndex=0;
 	debi("b-"+num).style.position="relative";
 
-    debi("b-"+num).style.left="0px";//debi("dummy").offsetLeft+"px";
-    debi("b-"+num).style.top="0px";//debi("dummy").offsetTop+"px";
+    debi("b-"+num).style.left="0px";
+    debi("b-"+num).style.top="0px";
     debi("b-"+num).style.visibility="visible";
     debi("dummy").style.display="none";
     for(let i=0;i<button_array.length;i++){
@@ -514,72 +496,95 @@ function drop_mup(e){
 /*right click confirm*/
 var assign_count=0;
 function link_data(){
-    const select_files = debi("selected_data").files;
-    if(select_files){
-        let num=Number(file_id.split("-")[1]);
-        let alert_count=0;
-        let o_c=button_array[num].order;//order_count
-        let repeat_count;
-        if((order_array.length-o_c)>=select_files.length){
-            assign_count=repeat_count=select_files.length;
+    file_array = debi("selected_data").files;
+    let num=Number(file_id.split("-")[1]);
+    if(file_array){
+        if((order_array.length-num)>=file_array.length){
+            assign_count=file_array.length;
         }
         else{
-            assign_count=repeat_count=order_array.length-o_c;
+            assign_count=order_array.length-num;
         }
-        console.log("seek_alert_on");
-        seek_alert_on();
-        for (let i=0;i<repeat_count;i++){
-            if(select_files[i]){
-                //console.log("select_files true");
-                if(select_files[i].type.indexOf("audio")>=0){
-                    if(button_array[order_array[o_c]]){
-                        console.log("o_c="+o_c);
-                        button_array[order_array[o_c]].name=select_files[i].name;
-                        button_array[order_array[o_c]].type=select_files[i].type;
-                        button_array[order_array[o_c]].data=select_files[i];
-                        let create=URL.createObjectURL(select_files[i]);// faster than readAsDataURL()
-                        //let create=debi("selected_data").files[0];//waiting for srcObject depend on browser
-                        button_array[order_array[o_c]].url=create;
-                        button_array[order_array[o_c]].loop=false;
-                        //button_array[order_array[o_c]].dblob=select_files[i];
-                        //seek_nosound_time(o_c,button_array[order_array[o_c]].dblob);
-                        console.log("seek_nosound_time");
-                        seek_nosound_time(o_c,select_files[i]);
-                    }
-                    o_c++;
+        if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+            console.log(window.navigator.userAgent.toLowerCase());
+            let config_page='<div class="right_click_lay_div_safari">';
+                if(assign_count==1){
+                    config_page+=debi("bnn-"+num).innerHTML;
                 }
                 else{
-                    alert_count++;
+                    config_page+=debi("bnn-"+num).innerHTML+"  to  "+((Number(debi("bnn-"+num).innerHTML)+assign_count-1)+"").padStart(2, '0');
                 }
-            }
+            
+                config_page+='<input type="button" id="b_change" class="size_13" value="Seek Sounds" onClick="throw_to_seek()">';
+                config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="choice_again()">';
+            config_page+='</div>';
+            debi("confirm_lay").innerHTML=config_page;
+            debi("confirm_lay_background").style.display='flex';
+            debi("confirm_lay").style.display='block';
         }
-        debi("selected_data").value="";
-        if(alert_count==1){
-            alert("Sorry "+alert_count+" file no sound data");
-        }
-        else if(alert_count>1){
-            alert("Sorry "+alert_count+" files no sound data");
+        else{
+            throw_to_seek();
         }
     }
 	else{
 		alert("Sorry no data");
 	}
-	debi("right_click_background").style.display='none';
-	debi("right_click_lay").style.display='none';
+	//debi("right_click_background").style.display='none';
+	//debi("right_click_lay").style.display='none';
+}
+
+function throw_to_seek(){
+    console.log("throw_to_seek");
+    let alert_count=0;
+    let o_c=Number(file_id.split("-")[1]);
+    /*if((order_array.length-o_c)>=file_array.length){
+        assign_count=file_array.length;
+    }
+    else{
+        assign_count=order_array.length-o_c;
+    }*/
+
+    if(debi("confirm_lay_background").style.display=='flex'){
+        debi("confirm_lay_background").style.display='none';
+        debi("confirm_lay").innerHTML="";
+        debi("confirm_lay").style.display='none';
+    }
+    console.log("seek_alert_on");
+    seek_alert_on();
+    for (let i=0;i<assign_count;i++){
+        if(file_array[i]){
+            if(file_array[i].type.indexOf("audio")>=0){
+                if(button_array[order_array[o_c]]){
+                    console.log("o_c="+o_c);
+                    button_array[order_array[o_c]].name=file_array[i].name;
+                    button_array[order_array[o_c]].type=file_array[i].type;
+                    button_array[order_array[o_c]].data=file_array[i];
+                    let create=URL.createObjectURL(file_array[i]);// faster than readAsDataURL()
+                    button_array[order_array[o_c]].url=create;
+                    button_array[order_array[o_c]].loop=false;
+                    seek_nosound_time(o_c);//,button_array[o_c].data
+                }
+                o_c++;
+            }
+            else{
+                alert_count++;
+            }
+        }
+    }
+    debi("selected_data").value="";
+    file_array=[];
+    if(alert_count==1){
+        alert("Sorry "+alert_count+" file no sound data");
+    }
+    else if(alert_count>1){
+        alert("Sorry "+alert_count+" files no sound data");
+    }
 }
 
 function seek_alert_on(){
     let seeking_line='<div class="seek_lay_div">';
     seeking_line+='<span style="color:hsla(0,0%,45%,1.00)">';
-    //seeking_line+='adjusting cue timing of sounds';
-    /*if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
-        //s_d_array_count=video_check_count;//video_check_count
-        seeking_line+='safari do not adjust cue timing of sounds';
-    }
-    else{*/
-        //assign_count=video_check_count;
-        seeking_line+='adjusting cue timing of sounds';
-    //}
+    seeking_line+='adjusting cue timing of sounds';
     seeking_line+='</span>';
     seeking_line+='</div>';
     debi("seek_lay").innerHTML=seeking_line;
@@ -593,98 +598,79 @@ function seek_alert_off(){
     debi("seek_lay_background").style.display='none';
 }
 
-function seek_nosound_time(o_c,select_file){
-	//console.log("select_file="+select_file);
-	let source;
-	let animationId;
-	let audioContext = new AudioContext();
-	//let audioContext = new OfflineAudioContext()
-	let fileReader   = new FileReader();
-	let gainNode = audioContext.createGain();                        
-	let analyser = audioContext.createAnalyser();
-	analyser.fftSize = FFT_SIZE;
-	analyser.connect(gainNode).connect(audioContext.destination);
-	gainNode.gain.value=0;
-    //debi("visualizer").innerHTML+='<canvas id="can_'+o_c+'" class="canvas_css"></canvas>';//
-	//let canvas = document.getElementById("can_"+o_c);
-	//console.log("canvas="+canvas);
-	//let canvasContext = canvas.getContext('2d');//2d描写の時に必ずいる
-	//canvas.width=analyser.frequencyBinCount*8;//
-	//canvas.height=analyser.frequencyBinCount*8;
-	//console.log("canvas.width="+canvas.width+" canvas.height="+canvas.height);
-	//console.log("debi(b-"+o_c+").height="+debi("b-"+o_c).height);
-	fileReader.readAsArrayBuffer(select_file);
-	let conti_stop=0;
-	//let frame_count=0;
-	let seek_start;
-	let seek_end=0;
-	let render = (timestamp)=>{
-	//console.log("analyser.frequencyBinCount="+analyser.frequencyBinCount);
-		if(seek_start===undefined){
+function seek_nosound_time(num){
+    console.log("num="+num);
+    //let animationId;
+    const audioElement = new Audio(button_array[num].url);
+    let context = new AudioContext();
+    let nodeSource = context.createMediaElementSource(audioElement);//
+    let gainNode = context.createGain();
+    gainNode.gain.value=0;
+    let nodeAnalyser = context.createAnalyser();
+    nodeAnalyser.fftSize = FFT_SIZE;
+    nodeSource.connect(nodeAnalyser);
+    let running;
+    //let conti_stop=0;
+    //let seek_start;
+	//let seek_end=0;
+    let visloop=()=>{
+        console.log("visloop in")
+		/*if(seek_start===undefined){
 			seek_start=timestamp;
-			//console.log("seek_start="+seek_start);
+			console.log("seek_start="+seek_start);
+		}*/
+		const freqByteData = new Uint8Array(FFT_SIZE / 2);
+		nodeAnalyser.getByteFrequencyData(freqByteData);
+		for (let i = 0; i < freqByteData.length; i++){
+			const freqSum = freqByteData[i];
+			if(freqSum>5){
+                running=audioElement.currentTime.toFixed(3)
+			    //conti_stop++;
+			  	break;
+		    }
 		}
-		let spectrums = new Uint8Array(analyser.frequencyBinCount);
-		analyser.getByteFrequencyData(spectrums);
-		//canvasContext.clearRect(0, 0, 300, 300);
-		for(let j=0, len=spectrums.length; j<len; j++){
-			//canvasContext.fillRect(j*10, 300, 5, -spectrums[j]);
-			if(spectrums[j]>5){
-				conti_stop++;
-				break;
-			}
-		}
-		if(conti_stop==0){
-			timestamp+=timestamp;
-			//console.log("spectrums="+spectrums);
-			//frame_count++;
-			animationId = requestAnimationFrame(render);
-		}
-		else{
-			//console.log("spectrums="+spectrums);
-			source.stop();
-			cancelAnimationFrame(animationId);
-			//canvasContext.clearRect(0, 0, 300, 300);
-			seek_end=timestamp;
-			//console.log("seek_end="+seek_end);
-			let jikan_sa=seek_end-seek_start;//sound_in_time
-			console.log("o_c="+o_c+" jikan_sa="+jikan_sa);
-			if(jikan_sa<200){
-				button_array[order_array[o_c]].start=0;
+		if(running===undefined){
+
+			//timestamp+=timestamp;
+			//button_array[num].visualizer = requestAnimationFrame(visloop);
+		}	
+ 		else{
+            //console.log("audioElement.pause()");
+			audioElement.pause();
+            clearInterval(button_array[num].visualizer);
+            button_array[num].visualizer="";
+			//cancelAnimationFrame(button_array[num].visualizer);
+			//seek_end=timestamp;
+			//let jikan_sa=seek_end-seek_start;//sound_in_time
+			console.log("num="+num+" running="+running);
+			if(running<0.2){
+				button_array[num].start=0;
 			}
 			else{
-				let start_jikan=jikan_sa%200;
-				if(start_jikan<100){
-					start_jikan+=100;
+				let start_jikan=running%0.2;
+				if(start_jikan<0.1){
+					start_jikan+=0.1;
 				}
-                start_jikan=jikan_sa-start_jikan;
-				console.log("start_jikan/1000="+start_jikan/1000);
-				button_array[order_array[o_c]].start=start_jikan/1000;
+                start_jikan=running-start_jikan;
+				//console.log("start_jikan/1000="+start_jikan/1000);
+				button_array[num].start=start_jikan;
 			}
 			assign_count--;
-			//console.log("assign_count="+assign_count);
-			assign_data(order_array[o_c]);
+			assign_data(num);
 			if(assign_count==0){
-				debi("visualizer").innerHTML="";	
 				seek_alert_off();
 			}
 		}
 	}
-                    
-	fileReader.onload = ()=>{
-		audioContext.decodeAudioData(fileReader.result, function(buffer){
-			if(source) {
-				source.stop();
-				cancelAnimationFrame(animationId);
-			}
-			source = audioContext.createBufferSource();
-			source.buffer = buffer;
-			source.connect(analyser);
-			source.start(0);//原曲をシークするので0;
-			//frame_count++;
-			animationId = requestAnimationFrame(render);
-		});
-	};
+    /*let graph_ing=()=>{
+        button_array[num].visualizer=requestAnimationFrame(visloop);
+	}*/
+ 
+ 	//console.log("audioElement.play()");
+    audioElement.play();
+    button_array[num].visualizer=setInterval(()=>{visloop()},10);
+    //button_array[num].timer=setInterval(()=>{t_ing(num)},100);
+    //audioElement.addEventListener("play", graph_ing);
 }
 
 var file_id="";
@@ -699,35 +685,17 @@ function double_tap(e){
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
                 console.log("right click file_id="+file_id);
                 if(debi("selected_data")){
-                    //console.log("debi(selected_data) true");
                     let config_page='<div class="right_click_lay_div_safari">';
                         config_page+='<span class="break_words">';
                             config_page+=debi("bnn-"+num).innerHTML;
                         config_page+='</span>';
-                        config_page+='<input type="button" id="b_change" class="size_13" value="Assaign" onClick="change_data()">';
-                        config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="close_r_click()">';
+                        config_page+='<input type="button" id="b_change" class="size_13" value="Select Sounds" onClick="change_data()">';
+                        config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="choice_again()">';
                     config_page+='</div>';
                     //console.log("config_page="+config_page);
-                    debi("right_click_lay").innerHTML=config_page;
-                    debi("right_click_background").style.display='block';
-                    debi("right_click_lay").style.display='flex';
-                    if(window.innerWidth-(e.pageX+50)<debi("right_click_lay").clientWidth){
-                        con_x=window.innerWidth-(debi("right_click_lay").clientWidth);
-                    }
-                    else{
-                        con_x=e.pageX+50;
-                    }
-                    if(window.innerHeight-e.pageY<40){
-                        con_y=window.innerHeight-40;
-                    }
-                    else if(e.pageY-80<0){
-                        con_y=0;					   
-                    }
-                    else{
-                        con_y=e.pageY-120;
-                    }   
-                    debi("right_click_lay").style.left=con_x+"px";
-                    debi("right_click_lay").style.top=con_y+"px";			
+                    debi("confirm_lay").innerHTML=config_page;
+                    debi("confirm_lay_background").style.display='flex';
+                    debi("confirm_lay").style.display='block';
                     trans_check=0;
                     console.log("never go to button_trans");
                 }
@@ -815,48 +783,9 @@ function double_tap(e){
     //return false;
 }
 
-var touchStartTime;
-var touchEndTime;
-var tapCount = 0;
-
-document.addEventListener('touchstart', function(e) {
-    e.stopPropagation();
-    //e.preventDefault();
-    //stopImmediatePropagation()
-    touchStartTime = Date.now();
-});
-
-document.addEventListener('touchend', function(e) {
-    e.stopPropagation();
-    //e.preventDefault();
-    //stopImmediatePropagation()
-    touchEndTime = Date.now();
-    if (touchEndTime - touchStartTime < 300) {
-        tapCount++;
-        if (tapCount === 2) {
-            if (touchEndTime - touchStartTime < 1000) {
-                console.log('ダブルタップ');
-                double_tap(e);
-                tapCount = 0;
-            }
-        }
-    } 
-    else {
-        tapCount = 0;
-    }
-});
-
-document.addEventListener('touchcancel', function(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    //stopImmediatePropagation()
-    tapCount = 0;
-});
-
 document.oncontextmenu =(e)=>{//right click safari ???
     e.stopPropagation();
     e.preventDefault();
-    //migi_click(e);
 
     if(e.target.id){
         if(e.target.id.indexOf("bld-")>=0){
@@ -956,19 +885,6 @@ document.oncontextmenu =(e)=>{//right click safari ???
     //return false;
 
 };
-
-function slide_each(num){
-	button_array[num].volume=Number(debi("each").value)/10;
-    debi("each_qty").innerHTML=Number(debi("each").value).toFixed(1);
-        if(button_array[num].type.indexOf("audio")>=0){
-            debi("mov-"+num).volume = button_array[num].volume*m_v/10;
-            button_array[num].content=debi("b-"+num).innerHTML;
-        }
-        else{
-            //open("movie.html","Display Window",window_options);
-            //window.focus();
-        }
-}
 
 function play_whr(num){
     if(debi("play_whr0").checked){
@@ -1077,11 +993,6 @@ document.addEventListener('click', (e)=>{
     }
 });
 
-// ダブルタップの間隔をリセットします
-setInterval(() => {
-    tapCount = 0;
-}, 300); //
-
 function play_check(num){
 	if(debi("movie-"+num).innerHTML!=""){
 		if(debi("mov-"+num).paused){
@@ -1177,7 +1088,7 @@ var in_time=0;
 function sound_fade_in(num){
     in_time+=0.1;
     if(fi_time<=in_time){
-        debi("mov-"+num).volume=button_array[num].volume*m_v/10;
+        button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10;
         debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",0%,100%,0.00)";
         debi("bld-"+num).innerHTML="";
         button_array[num].fading=0;
@@ -1188,7 +1099,7 @@ function sound_fade_in(num){
         debi("f_b_div").style.backgroundColor="hsla(0,0%,67%,1.00)";
     }
     else if(in_time<fi_time/2){
-        debi("mov-"+num).volume=(2/Math.pow(fi_time,2))*(Math.pow(in_time,2))*(button_array[num].volume*m_v/10);
+        button_array[num].gainNode.gain.value=(2/Math.pow(fi_time,2))*(Math.pow(in_time,2))*(button_array[num].volume*m_v/10);
         if(in_time.toFixed(1)*10%2==1){
             if(out_time==0){
                f_b_flick();
@@ -1202,7 +1113,7 @@ function sound_fade_in(num){
         }
     }
     else{
-        debi("mov-"+num).volume=((-(2/Math.pow(fi_time,2))*Math.pow((in_time-fi_time),2))+1)*(button_array[num].volume*m_v/10);
+        button_array[num].gainNode.gain.value=((-(2/Math.pow(fi_time,2))*Math.pow((in_time-fi_time),2))+1)*(button_array[num].volume*m_v/10);
         if(in_time.toFixed(1)*10%2==1){
             if(out_time==0){
                 f_b_flick();
@@ -1222,7 +1133,7 @@ var out_time=0;
 function sound_fade_out(num){
     out_time+=0.1;
     if(fo_time<=out_time){
-		debi("mov-"+num).volume=0;
+		button_array[num].gainNode.gain.value=0;
 		debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",0%,100%,0.00)";
         debi("bld-"+num).innerHTML="";
 		button_array[num].fading=0;
@@ -1235,7 +1146,7 @@ function sound_fade_out(num){
         to_end(num); 
     }
     else if(out_time<fo_time/2){
-        debi("mov-"+num).volume=(-(2/Math.pow(fo_time,2)*Math.pow(out_time,2))+1)*(button_array[num].volume*m_v/10);
+        button_array[num].gainNode.gain.value=(-(2/Math.pow(fo_time,2)*Math.pow(out_time,2))+1)*(button_array[num].volume*m_v/10);
         //console.log("debi(mov-"+num+").volume="+debi("mov-"+num).volume);
         if(out_time.toFixed(1)*10%2==1){
             f_b_flick();
@@ -1248,7 +1159,7 @@ function sound_fade_out(num){
         }
  	}
     else{
-        debi("mov-"+num).volume=(2/Math.pow(fo_time,2))*Math.pow((out_time-fo_time),2)*(button_array[num].volume*m_v/10);
+        button_array[num].gainNode.gain.value=(2/Math.pow(fo_time,2))*Math.pow((out_time-fo_time),2)*(button_array[num].volume*m_v/10);
         //console.log("debi(mov-"+num+").volume="+debi("mov-"+num).volume);
         if(out_time.toFixed(1)*10%2==1){
 			f_b_flick();
@@ -1289,47 +1200,48 @@ function t_ing(num){//time progress
     }
 }
 
+/*Audio object*/
+function make_audio(num){
+    this.audioElement = debi("mov-"+num);
+    this.context = new AudioContext();
+    this.nodeSource = context.createMediaElementSource(audioElement);//
+    this.gainNode = context.createGain();
+}
+
 /*start to play*/
 console.log("start to play");
 var fi_time=0;
 //var audioElement;
 const FFT_SIZE = 64;
 function start_to_play(num,fade){
-    let audioElement;
-    //let context;
-    let nodeAnalyser_L;
-    let nodeAnalyser_R;
- 	//let nodeSource;
-    //let stereoPanner_L;
-    //let stereoPanner_R;
-    //let Channel_L;
-    //let Channel_R;
-	let graph_ing=()=>{
-        if(audioElement==undefined){
-		    audioElement = debi("mov-"+num);
-            const context = new AudioContext();
-            const nodeSource = context.createMediaElementSource(audioElement);//
-            nodeSource.connect(context.destination);
-            const splitter_L = context.createChannelSplitter(2);
-            const merger_L = context.createChannelMerger(2);
-            const splitter_R = context.createChannelSplitter(2);
-            const merger_R = context.createChannelMerger(2);
-            nodeAnalyser_L = context.createAnalyser();
-            nodeAnalyser_R = context.createAnalyser();
-            nodeAnalyser_L.fftSize = FFT_SIZE;
-            nodeAnalyser_R.fftSize = FFT_SIZE;
-            // 0～1の範囲でデータの動きの速さ 0だともっとも速く、1に近づくほど遅くなる
-            nodeAnalyser_L.smoothingTimeConstant = 0.75;
-            nodeAnalyser_R.smoothingTimeConstant = 0.75;
-            nodeSource.connect(splitter_L).connect(merger_L, 0, 0).connect(nodeAnalyser_L);
-            nodeSource.connect(splitter_R).connect(merger_R, 1, 1).connect(nodeAnalyser_R);
-        }
-		button_array[num].visualizer=requestAnimationFrame(visloop);
-        //visloop();
+    let audioElement = debi("mov-"+num);
+    const context = new AudioContext();
+    const nodeSource = context.createMediaElementSource(audioElement);//
+    button_array[num].gainNode = context.createGain();
+    button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10;
+    console.log("button_array["+num+"].gainNode.gain.value)="+button_array[num].gainNode.gain.value);
+    nodeSource.connect(button_array[num].gainNode).connect(context.destination);
+    const splitter_L = context.createChannelSplitter(2);
+    const merger_L = context.createChannelMerger(2);
+    const splitter_R = context.createChannelSplitter(2);
+    const merger_R = context.createChannelMerger(2);
+    let nodeAnalyser_L = context.createAnalyser();
+    let nodeAnalyser_R = context.createAnalyser();
+    nodeAnalyser_L.fftSize = FFT_SIZE;
+    nodeAnalyser_R.fftSize = FFT_SIZE;
+    // 0～1の範囲でデータの動きの速さ 0だともっとも速く、1に近づくほど遅くなる
+    nodeAnalyser_L.smoothingTimeConstant = 0.75;
+    nodeAnalyser_R.smoothingTimeConstant = 0.75;
+    nodeSource.connect(button_array[num].gainNode).connect(splitter_L).connect(merger_L, 0, 0).connect(nodeAnalyser_L);
+    nodeSource.connect(button_array[num].gainNode).connect(splitter_R).connect(merger_R, 1, 1).connect(nodeAnalyser_R);
+ 	let graph_ing=()=>{
+        console.log("graph_ing=()");
+ 		button_array[num].visualizer=requestAnimationFrame(visloop);
 	}
 
 	let visloop=()=>{
-		//button_array[num].visualizer=requestAnimationFrame(visloop);
+		//console.log("visloop=()");
+        //button_array[num].visualizer=requestAnimationFrame(visloop);
 		// 波形データを格納する配列の生成
 		const freqByteData_L = new Uint8Array(FFT_SIZE / 2);
 		const freqByteData_R = new Uint8Array(FFT_SIZE / 2);
@@ -1353,6 +1265,7 @@ function start_to_play(num,fade){
 			//debi("box-"+num+"-"+i).style.height = (75*scale)+"px";
             //console.log("freqByteData = "+i);
 		}
+		button_array[num].visualizer=requestAnimationFrame(visloop);
 	}
 
     debi("mov-"+num).addEventListener("ended", ()=>{//num=-1;
@@ -1362,7 +1275,7 @@ function start_to_play(num,fade){
             debi("mov-"+num).currentTime=0+button_array[num].start;
             cancelAnimationFrame(button_array[num].visualizer);
 			clearInterval(button_array[num].timer)//function name
-            debi("mov-"+num).volume=button_array[num].volume*m_v/10
+            //button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10
             console.log("check");
 			debi("mov-"+num).play();
 			debi("mov-"+num).addEventListener("play", graph_ing);
@@ -1374,12 +1287,13 @@ function start_to_play(num,fade){
 		}
     });
     if(fade==1 && debi("fader").value!=0){//引数を受けている fade_on
-        debi("mov-"+num).volume=0;//
+        button_array[num].gainNode.gain.value=0;//
 		fi_time=Number(debi("fader").value);
         button_array[num].fading=2;//sound_fade_in(num);
         debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",50%,50%,0.30)";
     }
     if(button_array[num].type.indexOf("audio")>=0){
+        console.log("debi(mov-"+num+").play()");
         debi("mov-"+num).play();
     	debi("mov-"+num).addEventListener("play", graph_ing);
         button_array[num].on=1;
@@ -1487,14 +1401,30 @@ function slide_mr(){
 	m_v=Number(debi("master").value).toFixed(1);
     debi("master_qty").innerHTML=m_v;
     for(let i=0;i<button_array.length;i++){
-        if(button_array[i].type.indexOf("audio")>=0){
-            debi("mov-"+i).volume = button_array[i].volume*m_v/10;
+        if(button_array[i].on==1){
+            button_array[i].gainNode.gain.value=button_array[i].volume*m_v/10;
+            break;
+            //debi("mov-"+i).volume = button_array[i].volume*m_v/10;
         }
         else{
             //open("movie.html","Display Window",window_options);
             //window.focus();
         }
     }
+}
+
+function slide_each(num){
+	button_array[num].volume=Number(debi("each").value)/10;
+    debi("each_qty").innerHTML=Number(debi("each").value).toFixed(1);
+        if(button_array[num].on=1){
+            button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10;
+            //debi("mov-"+num).volume = button_array[num].volume*m_v/10;
+            button_array[num].content=debi("b-"+num).innerHTML;
+        }
+        else{
+            //open("movie.html","Display Window",window_options);
+            //window.focus();
+        }
 }
 
 function slide_fr(){
@@ -1531,25 +1461,6 @@ document.addEventListener('dblclick', (e)=>{
                 debi("tool_bar").style.display="none";
             }
         }
-        /*else if(e.target.id=="close_div"){//たたみ
-            if(debi("master_div").style.display=="none"){
-                debi("master_div").style.display="flex";
-                debi("fader_div").style.display="flex";
-            }
-            else{
-                if(flick_on==0){
-                    fade_on=0;
-                    flick_on=0;
-                    debi("f_b").style.color="hsla(208,100%,97%,1.00)";
-                    debi("f_b_div").style.backgroundColor="hsla(0,0%,67%,1.00)";
-                    debi("master_div").style.display="none";
-                    debi("fader_div").style.display="none";
-                }
-                else{
-                    //return false;
-                }
-            }
-        }*/
         else if(e.target.id=="button_background"){
             for(let i=0;i<order_array.length;i++){
                 let num=order_array[i];

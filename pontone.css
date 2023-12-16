@@ -1,5 +1,5 @@
 @charset "UTF-8";
-/*PonTONE v1.4.1*/
+/*PonTONE v1.4.2*/
 /* CSS Document */
 body{
     position: relative;
@@ -591,3 +591,25 @@ body{
 	align-content: space-around;
 	justify-content: space-around;
 }
+.confirm_seek_background_style{
+    display: none;
+    justify-content: center;
+    align-items: center;
+	position:fixed;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background-color:hsla(0,0%,0%,0.30);
+}
+.confirm_seek_style{
+	display:none;
+	height:auto;
+	width:auto;
+    font-size: 12pt;
+    /*vertical-align: middle;*/
+    border: 2px solid black;
+	border-radius: 5px;
+	background-color:white;
+}
+
