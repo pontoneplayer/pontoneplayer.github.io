@@ -1,5 +1,5 @@
 @charset "UTF-8";
-/*PonTONE v1.4.2*/
+/*PonTONE v1.4.3*/
 /* CSS Document */
 body{
     position: relative;
@@ -416,15 +416,6 @@ body{
 	align-items: center;
 	justify-content: space-around;
 }
-.right_click_lay_div_safari{
-	display:flex;
-	height:120px;
-	width:160px;
-	flex-direction: column;
-	align-content:center;
-	align-items: center;
-	justify-content: space-around;
-}
 .break_words{/*non flex*/
 	width:inherit;
     overflow-wrap: break-word;
@@ -560,7 +551,17 @@ body{
     background-color:hsla(0,0%,50%,1.00);
     color:white;
 }
+.safari_right_click_lay_div{
+	display:flex;
+	height:160px;
+	width:160px;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-around;
+}
+
 .seek_lay_background_style{
+	z-index:20;
     display: none;
     justify-content: center;
     align-items: center;
@@ -592,7 +593,7 @@ body{
 	justify-content: space-around;
 }
 .confirm_seek_background_style{
-    display: none;
+    display:none;
     justify-content: center;
     align-items: center;
 	position:fixed;

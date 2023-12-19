@@ -1,4 +1,4 @@
-/*PonTONE v1.4.2*/
+/*PonTONE v1.4.3*/
 function debi(id){
 	return document.getElementById(id);
 }
@@ -199,7 +199,11 @@ function assign_data(num){//new index_number
     debi("movie-"+num).innerHTML='<video id="mov-'+num+'" height="0px" width="0px"></video>';
     debi("mov-"+num).src=button_array[num].url;
     debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
-        debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-Math.floor(button_array[num].start)); 
+        //debi("mov-"+num).loop=button_array[num].loop;
+        //console.log("debi(mov-"+num+").duration="+debi("mov-"+num).duration);
+        //console.log("button_array["+num+"].start="+button_array[num].start);
+        //console.log("mov-"+num+" seek.duration="+data_duration(debi("mov-"+num).duration-button_array[num].start));
+        debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-button_array[num].start); 
         debi("mov-"+num).currentTime=button_array[num].start;
         for (let i = 0; i < FFT_SIZE/2; i++) {
             debi("box-"+num+"_L-"+i).style.width = "0px";
@@ -506,17 +510,21 @@ function link_data(){
             assign_count=order_array.length-num;
         }
         if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+            if(debi("right_click_background").style.display=='block'){
+                debi("right_click_background").style.display='none';
+                debi("right_click_lay").innerHTML="";
+                debi("right_click_lay").style.display='none';
+            }   
             console.log(window.navigator.userAgent.toLowerCase());
-            let config_page='<div class="right_click_lay_div_safari">';
-                if(assign_count==1){
-                    config_page+=debi("bnn-"+num).innerHTML;
-                }
-                else{
-                    config_page+=debi("bnn-"+num).innerHTML+"  to  "+((Number(debi("bnn-"+num).innerHTML)+assign_count-1)+"").padStart(2, '0');
-                }
-            
-                config_page+='<input type="button" id="b_change" class="size_13" value="Seek Sounds" onClick="throw_to_seek()">';
-                config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="choice_again()">';
+            let config_page='<div class="safari_right_click_lay_div">';
+            if(assign_count==1){
+                config_page+=debi("bnn-"+num).innerHTML;
+            }
+            else{
+                config_page+=debi("bnn-"+num).innerHTML+"  to  "+((Number(debi("bnn-"+num).innerHTML)+assign_count-1)+"").padStart(2, '0');
+            }
+            config_page+='<input type="button" id="b_change" class="size_13" value="Seek Sounds" onClick="throw_to_seek()">';
+            config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="choice_again()">';
             config_page+='</div>';
             debi("confirm_lay").innerHTML=config_page;
             debi("confirm_lay_background").style.display='flex';
@@ -624,21 +632,64 @@ function seek_nosound_time(num){
 		for (let i = 0; i < freqByteData.length; i++){
 			const freqSum = freqByteData[i];
 			if(freqSum>5){
-                running=audioElement.currentTime.toFixed(3)
+                audioElement.pause();
+                running=audioElement.currentTime;//.toFixed(3)
 			    //conti_stop++;
-			  	break;
-		    }
+                clearInterval(button_array[num].visualizer);
+                button_array[num].visualizer=undefined;
+                //cancelAnimationFrame(button_array[num].visualizer);
+                //seek_end=timestamp;
+                //let jikan_sa=seek_end-seek_start;//sound_in_time
+                console.log("num="+num+" running="+running);
+                if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+                    if(running<0.35){
+                        button_array[num].start=0;
+                    }
+                    else{
+                        let start_jikan=running%0.35;
+                        console.log(start_jikan);
+                        if(start_jikan<0.1){
+                            start_jikan+=0.1;
+                        }
+                        start_jikan=running-start_jikan;
+                        button_array[num].start=start_jikan;
+                        console.log("button_array["+num+"].start="+button_array[num].start);
+                    }
+                }
+                else{
+                    if(running<0.2){
+                        button_array[num].start=0;
+                    }
+                    else{
+                        let start_jikan=running%0.2;
+                        console.log(start_jikan);
+                        if(start_jikan<0.1){
+                            start_jikan+=0.1;
+                        }
+                        start_jikan=running-start_jikan;
+                        button_array[num].start=start_jikan;
+                        console.log("button_array["+num+"].start="+button_array[num].start);
+                    }
+    
+                }
+                assign_count--;
+                assign_data(num);
+                if(assign_count==0){
+                    seek_alert_off();
+                }
+                break;
+            }
 		}
-		if(running===undefined){
+		//if(running===undefined){
 
 			//timestamp+=timestamp;
 			//button_array[num].visualizer = requestAnimationFrame(visloop);
-		}	
- 		else{
+		//}	
+ 		/*//else{
             //console.log("audioElement.pause()");
 			audioElement.pause();
             clearInterval(button_array[num].visualizer);
-            button_array[num].visualizer="";
+            button_array[num].visualizer=undefined;
 			//cancelAnimationFrame(button_array[num].visualizer);
 			//seek_end=timestamp;
 			//let jikan_sa=seek_end-seek_start;//sound_in_time
@@ -660,7 +711,7 @@ function seek_nosound_time(num){
 			if(assign_count==0){
 				seek_alert_off();
 			}
-		}
+		//}*/
 	}
     /*let graph_ing=()=>{
         button_array[num].visualizer=requestAnimationFrame(visloop);
@@ -685,17 +736,34 @@ function double_tap(e){
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
                 console.log("right click file_id="+file_id);
                 if(debi("selected_data")){
-                    let config_page='<div class="right_click_lay_div_safari">';
+                    let config_page='<div class="safari_right_click_lay_div">';
                         config_page+='<span class="break_words">';
                             config_page+=debi("bnn-"+num).innerHTML;
                         config_page+='</span>';
                         config_page+='<input type="button" id="b_change" class="size_13" value="Select Sounds" onClick="change_data()">';
-                        config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="choice_again()">';
+                        config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="close_r_click()">';
                     config_page+='</div>';
                     //console.log("config_page="+config_page);
-                    debi("confirm_lay").innerHTML=config_page;
-                    debi("confirm_lay_background").style.display='flex';
-                    debi("confirm_lay").style.display='block';
+                    debi("right_click_lay").innerHTML=config_page;
+                    debi("right_click_background").style.display='block';
+                    debi("right_click_lay").style.display='flex';
+                    if(window.innerWidth-(e.pageX+50)<debi("right_click_lay").clientWidth){
+                        con_x=window.innerWidth-(debi("right_click_lay").clientWidth);
+                    }
+                    else{
+                        con_x=e.pageX+50;
+                    }
+                    if(window.innerHeight-e.pageY<40){
+                        con_y=window.innerHeight-40;
+                    }
+                    else if(e.pageY-200<0){
+                        con_y=0;					   
+                    }
+                    else{
+                        con_y=e.pageY-200;
+                    }
+                    debi("right_click_lay").style.left=con_x+"px";
+                    debi("right_click_lay").style.top=con_y+"px";			
                     trans_check=0;
                     console.log("never go to button_trans");
                 }
@@ -758,7 +826,6 @@ function double_tap(e){
 				debi("loop").checked=button_array[num].loop;
 				//console.log("debi(loop).checked="+debi("loop").checked);
 				debi("each").value=debi("each_qty").innerHTML=(button_array[num].volume*10).toFixed(1);
-				//clearTimeout(long_down);
 				//console.log("clearTimeout-ID="+long_down);
                 trans_check=0;
 				console.log("never go to button_trans");
@@ -767,7 +834,6 @@ function double_tap(e){
             }
         }
         else{
-            //clearTimeout(long_down);
             //console.log("clearTimeout-ID="+long_down);
             trans_check=0;
             console.log("trans_check="+trans_check);
@@ -777,11 +843,107 @@ function double_tap(e){
     else{
         console.log("no target");
     }
-    //clearTimeout(long_down);
     //console.log("clearTimeout-ID="+long_down);
     trans_check=0;
     //return false;
 }
+
+/*for iPad*/
+
+//var touchStartTime;
+var touchEndTime;
+var tapCount = 0;
+var d_top_seq_id;
+var touch_array=[];
+document.addEventListener('touchstart', function(e){
+    for(let i=0;i<button_array.length;i++){
+        if(e.target.id=="bld-"+i){
+            e.stopPropagation();
+            let e_id=e.target.id;
+            let touchStartTime = Date.now();
+            console.log("touchStartTime="+touchStartTime);
+            if(touch_array.length<=1){
+                touch_array.push(e_id+"&"+touchStartTime);
+            }
+            else{
+                touch_array.shift();
+                touch_array.push(e_id+"&"+touchStartTime);
+            }
+            break;
+        }
+    }
+    if(touch_array.length==2){
+        if(e.target.id==touch_array[0].split("&")[0] && touch_array[0].split("&")[0]==touch_array[1].split("&")[0]){
+            if (Number(touch_array[1].split("&")[1]) - Number(touch_array[0].split("&")[1]) < 100){
+                console.log("タップタイム差="+(Number(touch_array[1].split("&")[1]) - Number(touch_array[0].split("&")[1])));
+                console.log('ダブルタップ');
+                double_tap(e);
+            }
+        }
+    }
+    //console.log(touch_array);
+    /*if(e.target.id.indexOf("bld-")>=0){
+        e.stopPropagation();
+        //e.preventDefault();
+        //stopImmediatePropagation();
+        //d_top_seq_id=e.target.id;
+        console.log("start d_top_seq_id="+d_top_seq_id);
+        touchStartTime = Date.now();
+    }
+    else{
+        tapCount = 0;
+    }*/
+    //console.log("touchstart_tapCount="+tapCount);
+});
+
+/*document.addEventListener('touchend', function(e){
+    if(e.target.id.indexOf("bld-")>=0){
+        console.log("end d_top_seq_id="+d_top_seq_id);
+        //if(d_top_seq_id==e.target.id){
+            e.stopPropagation();
+            //e.preventDefault();
+            //stopImmediatePropagation()
+            touchEndTime = Date.now();
+            if (touchEndTime - touchStartTime < 300){
+                tapCount++;
+                console.log("touchend_tapCount_01="+tapCount);
+                if (tapCount === 2) {
+                    if (touchEndTime - touchStartTime < 1000){
+                        console.log('ダブルタップ');
+                        //double_tap(e);
+                        tapCount = 0;
+                    }
+                    else{
+                        tapCount = 0;
+                    }
+                }
+            } 
+            else {
+                tapCount = 0;
+            }
+        //}
+        //tapCount = 0;
+    }
+    else{
+        tapCount = 0;
+    }
+    console.log("touchend_tapCount_02="+tapCount);
+});*/
+
+document.addEventListener('touchcancel', function(e){
+    e.stopPropagation();
+    e.preventDefault();
+    //stopImmediatePropagation()
+    tapCount = 0;
+});
+
+// ダブルタップの間隔をリセットします
+/*setInterval(() => {
+    tapCount = 0;
+}, 300); */
+
+
+
 
 document.oncontextmenu =(e)=>{//right click safari ???
     e.stopPropagation();
@@ -908,6 +1070,7 @@ function play_end(num){
         button_array[num].loop=false;
         //debi("mov-"+num).loop=false;
     }
+    //console.log("debi(mov-"+num+").loop="+debi("mov-"+num).loop);
     button_array[num].content=debi("b-"+num).innerHTML;
 }
 
@@ -975,6 +1138,7 @@ var waiting_num=-1;
 var trans_check=0;
 //let long_down;
 document.addEventListener('click', (e)=>{
+    console.log("click !")
     if(e.target.id){
         if(e.target.id.indexOf("bld-")>=0){
 			let num=Number(e.target.id.split("-")[1]);
@@ -1214,9 +1378,10 @@ var fi_time=0;
 //var audioElement;
 const FFT_SIZE = 64;
 function start_to_play(num,fade){
-    let audioElement = debi("mov-"+num);
+    //let audioElement = debi("mov-"+num);
     const context = new AudioContext();
-    const nodeSource = context.createMediaElementSource(audioElement);//
+    //const nodeSource = context.createMediaElementSource(audioElement);//
+    const nodeSource = context.createMediaElementSource(debi("mov-"+num));//
     button_array[num].gainNode = context.createGain();
     button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10;
     console.log("button_array["+num+"].gainNode.gain.value)="+button_array[num].gainNode.gain.value);
@@ -1234,9 +1399,11 @@ function start_to_play(num,fade){
     nodeAnalyser_R.smoothingTimeConstant = 0.75;
     nodeSource.connect(button_array[num].gainNode).connect(splitter_L).connect(merger_L, 0, 0).connect(nodeAnalyser_L);
     nodeSource.connect(button_array[num].gainNode).connect(splitter_R).connect(merger_R, 1, 1).connect(nodeAnalyser_R);
+    let g_count=0;
  	let graph_ing=()=>{
-        console.log("graph_ing=()");
+        console.log("graph_ing="+g_count);
  		button_array[num].visualizer=requestAnimationFrame(visloop);
+        g_count++;
 	}
 
 	let visloop=()=>{
@@ -1268,39 +1435,22 @@ function start_to_play(num,fade){
 		button_array[num].visualizer=requestAnimationFrame(visloop);
 	}
 
-    debi("mov-"+num).addEventListener("ended", ()=>{//num=-1;
-		console.log("ended in !");
-        console.log("button_array["+num+"].loop="+button_array[num].loop);
-		if(button_array[num].loop==true){
-            debi("mov-"+num).currentTime=0+button_array[num].start;
-            cancelAnimationFrame(button_array[num].visualizer);
-			clearInterval(button_array[num].timer)//function name
-            //button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10
-            console.log("check");
-			debi("mov-"+num).play();
-			debi("mov-"+num).addEventListener("play", graph_ing);
-			button_array[num].timer=setInterval(()=>{t_ing(num)},100);
-		}
-		else{
-			console.log("ended to_end");
-			to_end(num);
-		}
-    });
     if(fade==1 && debi("fader").value!=0){//引数を受けている fade_on
         button_array[num].gainNode.gain.value=0;//
 		fi_time=Number(debi("fader").value);
         button_array[num].fading=2;//sound_fade_in(num);
         debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",50%,50%,0.30)";
     }
-    if(button_array[num].type.indexOf("audio")>=0){
+    //if(button_array[num].type.indexOf("audio")>=0){
         console.log("debi(mov-"+num+").play()");
         debi("mov-"+num).play();
-    	debi("mov-"+num).addEventListener("play", graph_ing);
+        graph_ing();
+        console.log("ended_count first");
         button_array[num].on=1;
-    }
-    else{
+    //}
+    //else{
         //open("movie.html","Display Window",window_options);
-    }
+    //}
     button_array[num].timer=setInterval(()=>{t_ing(num)},100);
     let hue_num=button_array[num].color;
     debi("b-"+num).style.backgroundColor="hsla("+hue_num+",70%,50%,0.10)";
@@ -1312,6 +1462,44 @@ function start_to_play(num,fade){
     debi("bnn-"+num).style.color="hsla("+hue_num+",90%,35%,0.30)";
     debi("bdn-"+num).style.color="hsla("+hue_num+",90%,35%,0.80)";
     waiting_num=-1;
+    
+    /*debi("mov-"+num).addEventListener("playing", ()=>{//num=-1;
+        console.log("playing")
+        if(debi("mov-"+num).currentTime===0){
+            clearInterval(button_array[num].timer)//function name
+            button_array[num].timer=undefined;
+            debi("mov-"+num).currentTime=0+button_array[num].start;//seeked start time
+            console.log("playing debi(mov-"+num+").currentTime="+debi("mov-"+num).currentTime);
+            //debi("mov-"+num).play();
+            button_array[num].timer=setInterval(()=>{t_ing(num)},100);
+
+        }
+    });*/
+    
+    debi("mov-"+num).addEventListener("ended", ()=>{//num=-1;
+		console.log("ended in !");
+		if(button_array[num].loop==true){
+            console.log("button_array["+num+"].loop="+button_array[num].loop);
+            //console.log("debi(mov-"+num+").loop="+debi("mov-"+num).loop);
+            //cancelAnimationFrame(button_array[num].visualizer);
+            //button_array[num].visualizer=undefined;
+			clearInterval(button_array[num].timer)//function name
+            button_array[num].timer=undefined;
+            button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10
+            //console.log("check");
+            //if(debi("mov-"+num)){
+                debi("mov-"+num).play();
+                debi("mov-"+num).currentTime=0+button_array[num].start;//seeked start time
+                console.log("ended debi(mov-"+num+").currentTime="+debi("mov-"+num).currentTime);
+                button_array[num].timer=setInterval(()=>{t_ing(num)},100);
+            //}
+        }
+		else{
+			console.log("ended to_end");
+			to_end(num);
+		}
+	});
+
 }   
 
 /*stop to play*/
@@ -1332,7 +1520,9 @@ function to_end(num){
     debi("mov-"+num).pause();
     clearInterval(button_array[num].timer)//function name
 	cancelAnimationFrame(button_array[num].visualizer);
-    //console.log("clear button_array[num].timer-ID="+button_array[num].timer);
+    button_array[num].timer=undefined;//function name
+	button_array[num].visualizer=undefined;
+   //console.log("clear button_array[num].timer-ID="+button_array[num].timer);
     if(button_array[num].cue==1){
         debi("mov-"+num).currentTime=0+button_array[num].start;
         for (let i = 0; i < FFT_SIZE/2; i++) {
@@ -1365,11 +1555,11 @@ function reassign(num){//stop & reflesh
     debi("movie-"+num).innerHTML='<video id="mov-'+num+'" height="0px" width="0px"></video>';
     debi("mov-"+num).src=button_array[num].url;
     debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
-        debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-Math.floor(button_array[num].start)); 
-    //debi("mov-"+num).loop=button_array[num].loop;
-    debi("mov-"+num).currentTime=button_array[num].begining;
-    button_array[num].content=debi("b-"+num).innerHTML;
-    prepare_button(num);
+        debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-button_array[num].start); 
+        //debi("mov-"+num).loop=button_array[num].loop;
+        debi("mov-"+num).currentTime=button_array[num].begining;
+        button_array[num].content=debi("b-"+num).innerHTML;
+        prepare_button(num);
     });
 }
 
@@ -1461,6 +1651,25 @@ document.addEventListener('dblclick', (e)=>{
                 debi("tool_bar").style.display="none";
             }
         }
+        /*else if(e.target.id=="close_div"){//たたみ
+            if(debi("master_div").style.display=="none"){
+                debi("master_div").style.display="flex";
+                debi("fader_div").style.display="flex";
+            }
+            else{
+                if(flick_on==0){
+                    fade_on=0;
+                    flick_on=0;
+                    debi("f_b").style.color="hsla(208,100%,97%,1.00)";
+                    debi("f_b_div").style.backgroundColor="hsla(0,0%,67%,1.00)";
+                    debi("master_div").style.display="none";
+                    debi("fader_div").style.display="none";
+                }
+                else{
+                    //return false;
+                }
+            }
+        }*/
         else if(e.target.id=="button_background"){
             for(let i=0;i<order_array.length;i++){
                 let num=order_array[i];
