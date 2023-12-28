@@ -1,4 +1,4 @@
-/*PonTONE v1.4.3*/
+/*PonTONE v1.4.4*/
 function debi(id){
 	return document.getElementById(id);
 }
@@ -562,14 +562,14 @@ function throw_to_seek(){
     for (let i=0;i<assign_count;i++){
         if(file_array[i]){
             if(file_array[i].type.indexOf("audio")>=0){
-                if(button_array[order_array[o_c]]){
+                if(button_array[o_c]){
                     console.log("o_c="+o_c);
-                    button_array[order_array[o_c]].name=file_array[i].name;
-                    button_array[order_array[o_c]].type=file_array[i].type;
-                    button_array[order_array[o_c]].data=file_array[i];
+                    button_array[o_c].name=file_array[i].name;
+                    button_array[o_c].type=file_array[i].type;
+                    button_array[o_c].data=file_array[i];
                     let create=URL.createObjectURL(file_array[i]);// faster than readAsDataURL()
-                    button_array[order_array[o_c]].url=create;
-                    button_array[order_array[o_c]].loop=false;
+                    button_array[o_c].url=create;
+                    button_array[o_c].loop=false;
                     seek_nosound_time(o_c);//,button_array[o_c].data
                 }
                 o_c++;
@@ -847,102 +847,6 @@ function double_tap(e){
     trans_check=0;
     //return false;
 }
-
-/*for iPad*/
-
-//var touchStartTime;
-var touchEndTime;
-var tapCount = 0;
-var d_top_seq_id;
-var touch_array=[];
-document.addEventListener('touchstart', function(e){
-    for(let i=0;i<button_array.length;i++){
-        if(e.target.id=="bld-"+i){
-            e.stopPropagation();
-            let e_id=e.target.id;
-            let touchStartTime = Date.now();
-            console.log("touchStartTime="+touchStartTime);
-            if(touch_array.length<=1){
-                touch_array.push(e_id+"&"+touchStartTime);
-            }
-            else{
-                touch_array.shift();
-                touch_array.push(e_id+"&"+touchStartTime);
-            }
-            break;
-        }
-    }
-    if(touch_array.length==2){
-        if(e.target.id==touch_array[0].split("&")[0] && touch_array[0].split("&")[0]==touch_array[1].split("&")[0]){
-            if (Number(touch_array[1].split("&")[1]) - Number(touch_array[0].split("&")[1]) < 100){
-                console.log("タップタイム差="+(Number(touch_array[1].split("&")[1]) - Number(touch_array[0].split("&")[1])));
-                console.log('ダブルタップ');
-                double_tap(e);
-            }
-        }
-    }
-    //console.log(touch_array);
-    /*if(e.target.id.indexOf("bld-")>=0){
-        e.stopPropagation();
-        //e.preventDefault();
-        //stopImmediatePropagation();
-        //d_top_seq_id=e.target.id;
-        console.log("start d_top_seq_id="+d_top_seq_id);
-        touchStartTime = Date.now();
-    }
-    else{
-        tapCount = 0;
-    }*/
-    //console.log("touchstart_tapCount="+tapCount);
-});
-
-/*document.addEventListener('touchend', function(e){
-    if(e.target.id.indexOf("bld-")>=0){
-        console.log("end d_top_seq_id="+d_top_seq_id);
-        //if(d_top_seq_id==e.target.id){
-            e.stopPropagation();
-            //e.preventDefault();
-            //stopImmediatePropagation()
-            touchEndTime = Date.now();
-            if (touchEndTime - touchStartTime < 300){
-                tapCount++;
-                console.log("touchend_tapCount_01="+tapCount);
-                if (tapCount === 2) {
-                    if (touchEndTime - touchStartTime < 1000){
-                        console.log('ダブルタップ');
-                        //double_tap(e);
-                        tapCount = 0;
-                    }
-                    else{
-                        tapCount = 0;
-                    }
-                }
-            } 
-            else {
-                tapCount = 0;
-            }
-        //}
-        //tapCount = 0;
-    }
-    else{
-        tapCount = 0;
-    }
-    console.log("touchend_tapCount_02="+tapCount);
-});*/
-
-document.addEventListener('touchcancel', function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    //stopImmediatePropagation()
-    tapCount = 0;
-});
-
-// ダブルタップの間隔をリセットします
-/*setInterval(() => {
-    tapCount = 0;
-}, 300); */
-
-
 
 
 document.oncontextmenu =(e)=>{//right click safari ???
