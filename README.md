@@ -1,9 +1,8 @@
-PonTONE v1.4.3
+PonTONE v1.4.4
 
 cue sound player on web browser
 
-loop play bug on Safari fixed
-
+assign bug, after button moved, fixed
 
 some confirmations on Safari to select sounds and to assaign sounds to buttons
 
