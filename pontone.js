@@ -1,7 +1,11 @@
-/*PonTONE v1.4.4*/
+/*PonTONE v1.5.4*/
 function debi(id){
 	return document.getElementById(id);
 }
+
+/*device*/
+var user_device=window.navigator.userAgent.toLowerCase();
+console.log(user_device);
 
 /*choice pattern*/
 var b_pattern_array=[];
@@ -121,12 +125,15 @@ function myButton(){//button object
     this.content="";
     this.order;
     this.start=0;
+    this.all;
+    this.lines;
 }
 
 /*set-up buttons*/
 var button_array=[];
 var order_array=[];
 var dummy_button="";
+var colorb_c=0;
 var sub_win;
 var window_options = "menubar=no,location=yes,resizable=yes,scrollbars=no,status=no";
 function make_buttons(num1,num2){//num1=all,num2=lines
@@ -185,8 +192,9 @@ function make_buttons(num1,num2){//num1=all,num2=lines
         debi("b-"+i).style.order=i;
         order_array.push(i);
     }
-    debi("button_background").innerHTML+='<div id="dummy" class="button">';
-    debi("button_background").innerHTML+='</div>'
+    let dummy_line='<div id="dummy" class="button"><div id="bnd-dummy" class="bn_div"><span id="bnn-dummy" class="b_number_off"></span></div></div>';
+    debi("button_background").innerHTML+=dummy_line;
+    debi("bnn-dummy").style.color="hsla(0,0%,100%,1.00)";//white
     debi("dummy").style.display="none";
     debi("button_background").style.width=(num2*100+num2*20)+"px";
     debi("button_background").style.height=((num1/num2)*100+(num1/num2)*20)+"px";
@@ -199,10 +207,6 @@ function assign_data(num){//new index_number
     debi("movie-"+num).innerHTML='<video id="mov-'+num+'" height="0px" width="0px"></video>';
     debi("mov-"+num).src=button_array[num].url;
     debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
-        //debi("mov-"+num).loop=button_array[num].loop;
-        //console.log("debi(mov-"+num+").duration="+debi("mov-"+num).duration);
-        //console.log("button_array["+num+"].start="+button_array[num].start);
-        //console.log("mov-"+num+" seek.duration="+data_duration(debi("mov-"+num).duration-button_array[num].start));
         debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-button_array[num].start); 
         debi("mov-"+num).currentTime=button_array[num].start;
         for (let i = 0; i < FFT_SIZE/2; i++) {
@@ -232,181 +236,311 @@ function prepare_button(num){
     button_array[num].content=debi("b-"+num).innerHTML;
 }
 
+var x=0;
+var y=0;
+var drag_ele;
+var drag_move=0;
+
+/*touch pad*/
+document.addEventListener("touchstart", (e)=>{//touch //fader_div
+    if(e.target.parentNode.id=="tool_bar" || e.target.parentNode.parentNode.id=="tool_bar"){//tool_bar draggable
+        if(e.target.id=="close_x" || e.target.id=="master" || e.target.id=="f_b" || e.target.id=="fader"){
+        }
+        else{
+            //e.stopPropagation();
+            //e.preventDefault();
+            //drag_move=1;
+            drag_ele = debi("tool_bar");
+            debi("tool_bar").draggable=true;
+            x = e.pageX-debi("tool_bar").offsetLeft;
+            y = e.pageY-debi("tool_bar").offsetTop;
+            //stopImmediatePropagation();
+        }
+    }
+    else if(e.target.id.indexOf("bld-")>=0 && e.target.parentNode.id.indexOf("b-")>=0){
+        //e.stopPropagation();
+        //e.preventDefault();
+        //drag_move=1;
+        let num=Number(e.target.id.split("-")[1]);
+        if(debi("mov-"+num)){
+            if(debi("mov-"+num).paused){
+                drag_ele = debi("b-"+num);
+                debi("b-"+num).draggable=true;
+                //console.log('debi("b-'+num+'").draggable='+debi("b-"+num).draggable);
+                x = e.pageX-debi("b-"+num).offsetLeft;
+                y = e.pageY-debi("b-"+num).offsetTop;
+            }
+        }
+    }
+    else{
+    }
+    //console.log("drag_ele="+drag_ele);
+});//,{passive:false};
+
+document.addEventListener('touchmove', function(e) {
+    if(drag_ele.id=="tool_bar" && drag_ele.draggable==true){//tool_bar draggable
+        drag_move=1;
+        console.log("touchmove x="+x);
+        e.preventDefault();
+        e.stopPropagation();
+        debi("tool_bar").style.left=(e.pageX-x)+"px";
+        debi("tool_bar").style.top=(e.pageY-y)+"px";
+    }
+    else if(e.target.id.indexOf("bld-")>=0 && drag_ele.id.indexOf("b-")>=0 && drag_ele.draggable==true){
+        drag_move=1;
+        //console.log("touchmove dummy in");
+        e.preventDefault();
+        e.stopPropagation();
+        let num=Number(e.target.id.split("-")[1]);
+        debi("dummy").style.display="flex";//none -> flex
+        debi("dummy").style.order=button_array[num].order;
+        debi("dummy").style.visibility="hidden"; //flex & hidden
+        debi("b-"+num).style.position="absolute";
+        debi("b-"+num).style.zIndex=5;
+        debi("b-"+num).style.left=debi("dummy").offsetLeft+"px";
+        //debi("x_p").innerHTML=debi("dummy").offsetLeft;
+        debi("b-"+num).style.top=debi("dummy").offsetTop+"px";
+        //debi("y_p").innerHTML=debi("dummy").offsetTop;
+        let b_bgd_w=debi("button_background").style.width.replace(/p/g,"");
+        b_bgd_w=Number(b_bgd_w.replace(/x/g,""));
+        let b_bgd_h=debi("button_background").style.height.replace(/p/g,"");
+        b_bgd_h=Number(b_bgd_h.replace(/x/g,""));
+
+        let l_p=0;//left_place
+        let t_p=0;//top_place
+        let w_c=b_bgd_w/(100+20);//wide_count
+        let h_c=b_bgd_h/(100+20);//high_count
+        let left_n=-1;//left_number
+        let top_n=-1;//top_number
+
+        for(let i=0;i<w_c;i++){
+            if(i==0){
+                l_p=110;
+            }
+            else{
+                l_p+=120;
+            }
+            if(i==w_c-1){
+                l_p+=10;
+            }
+            if(e.pageX - debi("button_background").offsetLeft>=0 && e.pageX-debi("button_background").offsetLeft<=l_p){
+                left_n=i;
+                break
+            }
+        }
+        for(let i=0;i<h_c;i++){
+            if(i==0){
+                t_p=110;
+            }
+            else{
+                t_p+=120;
+            }
+            if(i==h_c-1){
+                t_p+=10;
+            }
+            if(e.pageY - debi("button_background").offsetTop>=0 && e.pageY-debi("button_background").offsetTop<=t_p){
+                top_n=i;
+                break
+            }
+        }
+        if(left_n>=0 && top_n>=0){
+            let w_num=debi("dummy").style.order//with_number
+            let t_num=w_c*top_n+left_n;//to_number
+            if(t_num>w_num){
+                for(let i=0;i<t_num-w_num;i++){
+                    debi("b-"+order_array[t_num-i]).style.order=t_num-(i+1);
+                    button_array[order_array[t_num-i]].order=t_num-(i+1);
+                }
+            }
+            else if(t_num<w_num){
+                for(let i=0;i<w_num-t_num;i++){
+                    debi("b-"+order_array[t_num+i]).style.order=t_num+(i+1);
+                    button_array[order_array[t_num+i]].order=t_num+(i+1);
+                }
+            }
+            debi("dummy").style.order=t_num;
+            debi("b-"+num).style.order=t_num;
+            button_array[num].order=t_num;
+            order_array.splice(w_num, 1);
+            order_array.splice(t_num, 0, num);
+            console.log(order_array);
+        }
+    }
+    else{
+    }
+    //console.log("touchmove drag_ele.id="+drag_ele.id);
+    //console.log("drag_move="+drag_move);
+
+},{passive:false});
+
+var touchEndTime;
+var tapCount = 0;
+var d_top_seq_id;
+var touch_array=[];
+document.addEventListener('touchend', function(e){
+    //console.log("drag_ele="+drag_ele);
+    //console.log("drag_ele.id="+drag_ele.id);
+    if(drag_move==1){
+        e.preventDefault();
+        e.stopPropagation();
+        if(drag_ele.id=="tool_bar"){
+            console.log("touchend tool_bar drag_ele.id="+drag_ele.id);
+            console.log("touchmove x="+x);
+            debi("tool_bar").style.left=e.pageX-x+"px";
+            debi("tool_bar").style.top=e.pageY-y+"px";
+            drag_ele=undefined;
+            debi("tool_bar").draggable=false;
+            drag_move=0;
+            console.log("debi(tool_bar).draggable="+debi("tool_bar").draggable+" drag_move="+drag_move);
+        }
+        else if(drag_ele.id.indexOf("b-")>=0){
+            drop_mup(e);
+        }
+        else{
+        }  
+    }
+    else{
+        let touchStartTime = Date.now();
+        //console.log("touchStartTime="+touchStartTime);
+        if(touch_array.length<=1){
+            touch_array.push(e.target.id+"&"+touchStartTime);
+        }
+        else{
+            touch_array.shift();
+            touch_array.push(e.target.id+"&"+touchStartTime);
+        }
+        console.log("touch_array="+touch_array);
+        //console.log("e_id="+e_id);
+        if(touch_array.length==2){
+            if(touch_array[0].split("&")[0].split("-")[1]==touch_array[1].split("&")[0].split("-")[1]){
+                if(Number(touch_array[1].split("&")[1]) - Number(touch_array[0].split("&")[1]) < 100){
+                    //e.preventDefault();
+                    //e.stopPropagation();
+                    console.log("ダブルタップ時間差="+(Number(touch_array[1].split("&")[1]) - Number(touch_array[0].split("&")[1])));
+                    double_tap(e);
+                }
+            }
+        }
+    }
+},{passive:false});
+/*
+document.addEventListener('touchcancel', function(e){
+    e.stopPropagation();
+    e.preventDefault();
+    //stopImmediatePropagation()
+    tapCount = 0;
+});
+*/
+
 /*dataTransfer.files drag & drop*/
-let check_t_bar;
-document.addEventListener("mousedown", (e)=>{//fader_div
-	if(e.target.id.indexOf("bld-")>=0){
-        //console.log("mousedown e.target.id="+e.target.id);
+document.addEventListener("mousedown", (e)=>{//when no drag , clear at mouseup
+    //console.log("mousedown="+drag_move);
+    //console.log("mousedown e.target.id="+e.target.id);
+    //console.log("mousedown e.target.parentNode.id="+e.target.parentNode.id);
+    if(e.target.parentNode.id=="tool_bar" || e.target.parentNode.parentNode.id=="tool_bar"){//tool_bar draggable
+        if(e.target.id=="close_x" || e.target.id=="master" || e.target.id=="f_b" || e.target.id=="fader"){
+            //console.log(e.target.id);
+        }
+        else{
+            debi("tool_bar").draggable=true;
+            console.log("debi(tool_bar).draggable="+debi("tool_bar").draggable);
+        }
+
+    }
+	else if(e.target.parentNode.id.indexOf("b-")>=0){
         let num=Number(e.target.id.split("-")[1]);
         if(debi("mov-"+num)){
             if(debi("mov-"+num).paused){
                 debi("b-"+num).draggable=true;
-                //console.log('mousedown  debi("b-'+num+'").draggable='+debi("b-"+num).draggable);
             }
         }
 	}
     else{
-        check_t_bar=e.target.id;
     }
 });
 
-var x=0;
-var y=0;
-function button_trans(num){//delete ?
-    /*debi("dummy").style.display="flex";
-    debi("dummy").style.order=button_array[num].order;
-    debi("dummy").style.visibility="hidden";
-    debi("b-"+num).style.position="absolute";
-    debi("b-"+num).style.zIndex=5;
-    debi("b-"+num).style.left=debi("dummy").offsetLeft+"px";
-    debi("b-"+num).style.top=debi("dummy").offsetTop+"px";*/
-}
-
-var drag_ele="";
-document.ondragstart=drag_start; 
-function drag_start(e){// only on browser
-    let num=Number(e.target.id.split("-")[1]);
-    if(e.target.id=="tool_bar"){
-        if(check_t_bar!="close_x" && check_t_bar!="master" && check_t_bar!="f_b" && check_t_bar!="fader"){
-            drag_ele = debi("tool_bar");
-            x = e.pageX - drag_ele.offsetLeft;
-            y = e.pageY - drag_ele.offsetTop;
-        }
-        else{
-            e.stopPropagation();
-            e.preventDefault();
-        }
+document.addEventListener("dragstart",(e)=>{// only on browser
+    if(e.target.id=="tool_bar"){//when drag , draggable id == target id
+        drag_ele = debi("tool_bar");
+        drag_move=1;
     }
     else if(e.target.id.indexOf("b-")>=0){
-        console.log("ondragstart e.target.id="+e.target.id);
-        drag_ele = debi("b-"+num);
-		debi("dummy").style.display="flex";
-		debi("dummy").style.order=button_array[num].order;
-		debi("dummy").style.visibility="hidden";
-		debi("b-"+num).style.position="absolute";
-		debi("b-"+num).style.zIndex=5;
-		debi("b-"+num).style.left=debi("dummy").offsetLeft+"px";
-        debi("x_p").innerHTML=debi("dummy").offsetLeft;
-		debi("b-"+num).style.top=debi("dummy").offsetTop+"px";
-        debi("y_p").innerHTML=debi("dummy").offsetTop;
+        let num=Number(e.target.id.split("-")[1]);
+        if(debi("mov-"+num)){
+            if(debi("mov-"+num).paused){
+                drag_ele = debi("b-"+num);
+                drag_move=1;
+                debi("dummy").style.display="flex";// flex <- none
+                debi("dummy").style.order=button_array[num].order;
+                console.log("dragstart debi(dummy).style.order="+debi("dummy").style.order);
+                if(button_array[num].order<9){
+                    debi("bnn-dummy").innerHTML='0'+(button_array[num].order+1);
+                }
+                else{
+                    debi("bnn-dummy").innerHTML=button_array[num].order+1;
+                }
+                debi("b-"+num).style.position="absolute";
+                debi("b-"+num).style.zIndex=5;
+                debi("b-"+num).style.left=debi("dummy").offsetLeft+"px";
+                //debi("x_p").innerHTML=debi("dummy").offsetLeft;
+                debi("b-"+num).style.top=debi("dummy").offsetTop+"px";
+                //debi("y_p").innerHTML=debi("dummy").offsetTop;
+            }
+        }
     }
     else{
     }
-}
+    console.log("dragstart drag_ele.id="+drag_ele.id);
+    console.log("drag_move="+drag_move);
+    x = e.pageX-drag_ele.offsetLeft;
+    y = e.pageY-drag_ele.offsetTop;
+});
 
-document.onmouseover=mouse_over
-function mouse_over(e){
+document.addEventListener("mouseover",(e)=>{
     // no func
     e.stopPropagation();
     e.preventDefault();
-}
+})
 
-document.ondragenter=drag_enter;
-function drag_enter(e){
+document.addEventListener("dragenter",(e)=>{
     // no func
     e.stopPropagation();
     e.preventDefault();
-}
+});
 
-document.ondragover=drag_move;
-function drag_move(e){
-    if(drag_ele!=""){
+document.addEventListener("dragover",(e)=>{
+    if(drag_ele!=undefined){
         if(drag_ele.id=="tool_bar"){
-             drag_ele.style.visibility="hidden";
+            drag_ele.style.visibility="hidden";
         }
         else if(drag_ele.id.indexOf("b-")>=0){
-			if(e.target.id.indexOf("bld-")>=0 || e.target.id==debi("button_background")){
-        //debi("x_p").innerHTML=e.pageX - debi("button_background").offsetLeft;
-        //debi("y_p").innerHTML=e.pageY - debi("button_background").offsetTop;
-				let num=Number(drag_ele.id.split("-")[1]);
-                debi("b-"+num).style.visibility="hidden";
- 				let b_bgd_w=debi("button_background").style.width.replace(/p/g,"");
-				b_bgd_w=Number(b_bgd_w.replace(/x/g,""));
-				let b_bgd_h=debi("button_background").style.height.replace(/p/g,"");
-				b_bgd_h=Number(b_bgd_h.replace(/x/g,""));
-
-				let l_p=0;//left_place
-				let t_p=0;//top_place
-				let w_c=b_bgd_w/(100+20);//wide_count
-				let h_c=b_bgd_h/(100+20);//high_count
-				let left_n=-1;//left_number
-				let top_n=-1;//top_number
-	
-				for(let i=0;i<w_c;i++){
-					if(i==0){
-						l_p=110;
-					}
-					else{
-						l_p+=120;
-					}
-					if(i==w_c-1){
-						l_p+=10;
-					}
-					if(e.pageX - debi("button_background").offsetLeft>=0 && e.pageX -   debi("button_background").offsetLeft<=l_p){
-						left_n=i;
-						break
-					}
-				}
-				for(let i=0;i<h_c;i++){
-					if(i==0){
-						t_p=110;
-					}
-					else{
-						t_p+=120;
-					}
-					if(i==h_c-1){
-						t_p+=10;
-					}
-					if(e.pageY - debi("button_background").offsetTop>=0 && e.pageY - debi("button_background").offsetTop<=t_p){
-						top_n=i;
-						break
-					}
-				}
-				if(left_n>=0 && top_n>=0){
-					let w_num=debi("dummy").style.order//with_number
-					let t_num=w_c*top_n+left_n;//to_number
-					if(t_num>w_num){
-						for(let i=0;i<t_num-w_num;i++){
-							debi("b-"+order_array[t_num-i]).style.order=t_num-(i+1);
-							button_array[order_array[t_num-i]].order=t_num-(i+1);
-						}
-					}
-					else if(t_num<w_num){
-						for(let i=0;i<w_num-t_num;i++){
-							debi("b-"+order_array[t_num+i]).style.order=t_num+(i+1);
-							button_array[order_array[t_num+i]].order=t_num+(i+1);
-						}
-					}
-                    debi("dummy").style.order=t_num;
-					debi("b-"+num).style.order=t_num;
-					button_array[num].order=t_num;
-					order_array.splice(w_num, 1);
-					order_array.splice(t_num, 0, num);
-					//console.log(order_array);
-				}
-			}
-		}
+            let num=Number(drag_ele.id.split("-")[1]);
+            debi("b-"+num).style.visibility="hidden";
+            debi("dummy").style.display="visible";
+        }
     }
-    //else{
-    //}
     e.stopPropagation();
 	e.preventDefault();
-}
+});
 
 var file_array=[];
-
-document.ondrop=drop;
-function drop(e){
-    console.log("drop drag_ele.id="+drag_ele.id);
-    if(drag_ele!=""){
-        if(drag_ele.id=="tool_bar"){
-            drag_ele.style.top = e.pageY - y + "px";
-            drag_ele.style.left = e.pageX - x + "px";
-            drag_ele.style.visibility="visible";
-            console.log("e.target.id="+e.target.id);
-        }
-        else if(drag_ele.id.indexOf("b-")>=0){
-            drop_mup(e);
+document.addEventListener("drop",(e)=>{
+    console.log("drop in");
+    if(drag_ele!=undefined){    
+        if(drag_move=1){
+            if(drag_ele.id=="tool_bar"){
+                drag_ele.style.top = e.pageY - y + "px";
+                drag_ele.style.left = e.pageX - x + "px";
+                drag_ele.style.visibility="visible";
+                drag_ele=undefined;
+                drag_move=0;
+                debi("tool_bar").draggable=false;
+                console.log("debi(tool_bar).draggable="+debi("tool_bar").draggable);
+                console.log("drag_move="+drag_move);
+            }
+            else if(drag_ele.id.indexOf("b-")>=0){
+                drop_mup(e);
+            }
         }
     }
     else{
@@ -416,36 +550,33 @@ function drop(e){
                 file_array = e.dataTransfer.files;//array
                 if(file_array){
 					let num=Number(file_id.split("-")[1]);//e.target.id?
-					//let alert_count=0;
-                    let o_c=button_array[num].order;//order_count
-                    //let repeat_count;
-                    if((order_array.length-o_c)>=file_array.length){
+                    let o_num=button_array[num].order;//order_count
+                    if((button_array.length-o_num)>=file_array.length){//order_a?
                         assign_count=file_array.length;
                         //console.log("if video_check_count="+video_check_count);
                     }
                     else{
-                        assign_count=order_array.length-o_c;
+                        assign_count=button_array.length-o_num;//order_array.length-o_c;//order_a?
                         //console.log("else video_check_count="+video_check_count);
                     }
-                    if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
-                        console.log(window.navigator.userAgent.toLowerCase());
+                    if(user_device.indexOf("safari")>=0 && user_device.indexOf("version")>=0){
+                        console.log("safari");
                         let config_page='<div class="right_click_lay_div_safari">';
-                            if(assign_count==1){
-                                config_page+=debi("bnn-"+num).innerHTML;
-                            }
-                            else{
-                                config_page+=debi("bnn-"+num).innerHTML+"  to  "+((Number(debi("bnn-"+num).innerHTML)+assign_count-1)+"").padStart(2, '0');
-                            }
-                        
-                            config_page+='<input type="button" id="b_change" class="size_13" value="Seek Sounds" onClick="throw_to_seek()">';
-                            config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="choice_again()">';
+                        if(assign_count==1){
+                            config_page+=debi("bnn-"+num).innerHTML;
+                        }
+                        else{
+                            config_page+=debi("bnn-"+num).innerHTML+"  to  "+((Number(debi("bnn-"+num).innerHTML)+assign_count)+"").padStart(2, '0');
+                        }
+                        config_page+='<input type="button" id="b_change" class="size_13" value="Seek Sounds" onClick="throw_to_seek()">';
+                        config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="choice_again()">';
                         config_page+='</div>';
                         debi("confirm_lay").innerHTML=config_page;
                         debi("confirm_lay_background").style.display='flex';
                         debi("confirm_lay").style.display='block';
                     }
                     else{
-                        throw_to_seek();
+                        throw_to_seek(o_num);
                     }
                 }   
                 else{
@@ -472,50 +603,192 @@ function drop(e){
     }
     e.stopPropagation();
     e.preventDefault();
-    drag_ele="";
-}
+    //console.log("drop_final drag_ele.id="+drag_ele.id);
+});
 
 function drop_mup(e){
-	let num=Number(drag_ele.id.split("-")[1]);
+    let num=Number(drag_ele.id.split("-")[1]);
+    let b_bgd_w=debi("button_background").style.width.replace(/p/g,"");
+    b_bgd_w=Number(b_bgd_w.replace(/x/g,""));
+    let b_bgd_h=debi("button_background").style.height.replace(/p/g,"");
+    b_bgd_h=Number(b_bgd_h.replace(/x/g,""));
+    let l_p_f=0;//left_place_1
+    let l_p_s=0;//left_place_2
+    let t_p=0;//top_place
+    let w_c=b_bgd_w/(100+20);//wide_count //100px around 10px
+    let h_c=b_bgd_h/(100+20);//high_count
+    let left_n=-1;//left_number
+    let top_n=-1;//top_number
+
+    for(let i=0;i<h_c;i++){
+        if(i==0){
+            t_p=110;
+        }
+        else{
+            t_p+=120;
+        }
+        if(i==h_c-1){
+            t_p+=10;
+        }
+        if(e.pageY - debi("button_background").offsetTop>=0 && e.pageY - debi("button_background").offsetTop<=t_p){
+            top_n=i;
+            break
+        }
+    }
+    let drop_count=(w_c-1)+2;
+    for(let i=0;i<drop_count;i++){
+        if(i==0){
+            l_p_s=10;
+        }
+        else if(i==drop_count-1){
+            l_p_f=l_p_s+100;
+            l_p_s+=110;
+        }
+        else{
+            l_p_f=l_p_s+100;
+            l_p_s+=120;
+        }
+        //console.log("l_p_f="+l_p_f+" l_p_s="+l_p_s);
+        if(e.pageX - debi("button_background").offsetLeft>l_p_f && e.pageX - debi("button_background").offsetLeft<l_p_s){
+            console.log("i="+i);
+            left_n=i;
+            break;
+        }
+    }
+    //console.log("left_n="+left_n+" top_n="+top_n);
+    console.log("target_num="+((drop_count-1)*top_n+left_n));//to_number
+    let do_num=Number(debi("dummy").style.order)//with_number
+    
+    if(left_n>=0 && top_n>=0){
+        /*let stamp_order_num=(b_num,t_num)=>{
+            console.log("debi(b-"+num+").style.order="+debi("b-"+num).style.order);
+            button_array[b_num].order=do_num;
+            console.log("button_array["+b_num+"].order="+button_array[b_num].order);
+            debi("b-"+b_num).style.order=do_num;
+            console.log("debi(b-"+b_num+").style.order="+debi("b-"+b_num).style.order);                
+        }*/
+        let t_num=(drop_count-1)*top_n+left_n;//to_number
+        console.log("t_num="+t_num+" do_num="+do_num);
+        if(t_num>do_num){
+            console.log("t_num>do_num 上り割り込み");
+            button_array[num].order=t_num-1;
+            debi("b-"+num).style.order=t_num-1;
+            let spliced_num=order_array.splice(do_num, 1)[0];
+            order_array.splice(t_num-1, 0, spliced_num);
+            console.log(order_array);
+            for(let k=0;k<(t_num-1)-do_num;k++){
+                //console.log("k="+k);
+                debi("b-"+order_array[do_num+k]).style.order=do_num+k;
+                button_array[order_array[do_num+k]].order=do_num+k;
+            }
+        }
+        else if(t_num<do_num){
+            console.log("t_num<do_num 下り割り込み");
+            button_array[num].order=t_num;
+            debi("b-"+num).style.order=t_num;
+            let spliced_num=order_array.splice(do_num, 1)[0];
+            order_array.splice(t_num, 0, spliced_num);
+            console.log(order_array);
+            for(let k=0;k<do_num-t_num;k++){
+                //console.log("k="+k);
+                debi("b-"+order_array[do_num-k]).style.order=do_num-k;
+                button_array[order_array[do_num-k]].order=do_num-k;
+            }
+        }
+    }
+    else{
+        let t_num=0;
+        if(e.target.id.indexOf("bld-")>=0){
+            t_num=Number(debi("b-"+e.target.id.split("-")[1]).style.order);
+            console.log("bld- b- t_num="+t_num);
+            let b_num=Number(e.target.id.split("-")[1]);
+            console.log("b_num="+b_num);
+            if(button_array[b_num].url!=undefined){
+                console.log("closs");
+                button_array[num].order=t_num;
+                //console.log("button_array["+num+"].order="+button_array[num].order);
+                debi("b-"+num).style.order=t_num;
+                //console.log("debi(b-"+num+").style.order="+debi("b-"+num).style.order);
+                button_array[b_num].order=do_num;
+                //console.log("button_array["+b_num+"].order="+button_array[b_num].order);
+                debi("b-"+b_num).style.order=do_num;
+                //console.log("debi(b-"+b_num+").style.order="+debi("b-"+b_num).style.order);
+                let change_a=order_array[do_num];
+                let change_b=order_array[t_num];
+                order_array[do_num]=change_b;
+                order_array[t_num]=change_a;
+                //let spliced_num=order_array.splice(do_num, 1)[0];
+                //order_array.splice(t_num, 0, spliced_num);
+                console.log(order_array);
+            }
+        }
+    }
+    
+    //console.log("button_array["+num+"].order="+button_array[num].order);
+    //console.log("debi(b-"+num+").style.order="+debi("b-"+num).style.order);
     debi("b-"+num).style.zIndex=0;
 	debi("b-"+num).style.position="relative";
-
     debi("b-"+num).style.left="0px";
     debi("b-"+num).style.top="0px";
-    debi("b-"+num).style.visibility="visible";
-    debi("dummy").style.display="none";
+    debi("dummy").style.display="none";//none <- flex
+    drag_ele.style.visibility="visible";//visible <- hidden
+    let button_order_line=""
     for(let i=0;i<button_array.length;i++){
         let order_num;
         if(button_array[i].order<9){
-            order_num='0'+(button_array[i].order+1);
+            order_num='0'+((button_array[i].order)+1);
+            
         }    
         else{
             order_num=button_array[i].order+1;
         }
         debi("bnn-"+i).innerHTML=order_num;
         button_array[i].content=debi("b-"+i).innerHTML;
+        button_order_line+=button_array[i].order+" ";
     }
+    console.log("button_order_line="+button_order_line);
+    drag_ele=undefined;
+    drag_move=0;
+    debi("b-"+num).draggable=false;
 }
+
+document.addEventListener("mouseup", (e)=>{//fader_div
+    //console.log("mouseup="+drag_move);
+    //console.log("mouseup e.target.id="+e.target.id);
+    //console.log("mouseup e.target.parentNode.id="+e.target.parentNode.id);
+    if(e.target.parentNode.id=="tool_bar" || e.target.parentNode.parentNode.id=="tool_bar"){//tool_bar draggable
+        debi("tool_bar").draggable=false;
+        console.log("debi(tool_bar).draggable="+debi("tool_bar").draggable);
+    }
+	else if(e.target.parentNode.id.indexOf("b-")>=0){
+        let num=Number(e.target.id.split("-")[1]);
+        debi("b-"+num).draggable=false;
+        console.log("debi(b-"+num+").draggable="+debi("b-"+num).draggable);
+	}
+    else{
+    }
+});
 
 /*right click confirm*/
 var assign_count=0;
 function link_data(){
     file_array = debi("selected_data").files;
-    let num=Number(file_id.split("-")[1]);
+    let num=Number(file_id.split("-")[1]);//button_array index number
+    let o_num=button_array[num].order;//button_array index number
     if(file_array){
-        if((order_array.length-num)>=file_array.length){
+        if((button_array.length-o_num)>=file_array.length){//order_a?
             assign_count=file_array.length;
         }
         else{
-            assign_count=order_array.length-num;
+            assign_count=button_array.length-o_num;//order_array.length-num;//order_a?
         }
-        if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
+        if((user_device.indexOf("safari")>=0 && user_device.indexOf("version")>=0) || user_device.indexOf("iphone")>=0 || user_device.indexOf("ipad")>=0){
+            console.log("safari&ipad");
             if(debi("right_click_background").style.display=='block'){
                 debi("right_click_background").style.display='none';
                 debi("right_click_lay").innerHTML="";
                 debi("right_click_lay").style.display='none';
             }   
-            console.log(window.navigator.userAgent.toLowerCase());
             let config_page='<div class="safari_right_click_lay_div">';
             if(assign_count==1){
                 config_page+=debi("bnn-"+num).innerHTML;
@@ -523,7 +796,7 @@ function link_data(){
             else{
                 config_page+=debi("bnn-"+num).innerHTML+"  to  "+((Number(debi("bnn-"+num).innerHTML)+assign_count-1)+"").padStart(2, '0');
             }
-            config_page+='<input type="button" id="b_change" class="size_13" value="Seek Sounds" onClick="throw_to_seek()">';
+            config_page+='<input type="button" id="b_change" class="size_13" value="Seek Sounds" onClick="throw_to_seek(Number(\''+o_num+'\'))">';//''+para+'' -> 'real' -> string -> Number(string)
             config_page+='<input type="button" id="b_clear" class="size_13" value="Quit" onClick="choice_again()">';
             config_page+='</div>';
             debi("confirm_lay").innerHTML=config_page;
@@ -531,27 +804,17 @@ function link_data(){
             debi("confirm_lay").style.display='block';
         }
         else{
-            throw_to_seek();
+            throw_to_seek(o_num);
         }
     }
 	else{
 		alert("Sorry no data");
 	}
-	//debi("right_click_background").style.display='none';
-	//debi("right_click_lay").style.display='none';
 }
 
-function throw_to_seek(){
-    console.log("throw_to_seek");
+function throw_to_seek(o_num){
+    console.log("throw_to_seek o_num="+o_num);
     let alert_count=0;
-    let o_c=Number(file_id.split("-")[1]);
-    /*if((order_array.length-o_c)>=file_array.length){
-        assign_count=file_array.length;
-    }
-    else{
-        assign_count=order_array.length-o_c;
-    }*/
-
     if(debi("confirm_lay_background").style.display=='flex'){
         debi("confirm_lay_background").style.display='none';
         debi("confirm_lay").innerHTML="";
@@ -562,21 +825,24 @@ function throw_to_seek(){
     for (let i=0;i<assign_count;i++){
         if(file_array[i]){
             if(file_array[i].type.indexOf("audio")>=0){
-                if(button_array[o_c]){
-                    console.log("o_c="+o_c);
-                    button_array[o_c].name=file_array[i].name;
-                    button_array[o_c].type=file_array[i].type;
-                    button_array[o_c].data=file_array[i];
-                    let create=URL.createObjectURL(file_array[i]);// faster than readAsDataURL()
-                    button_array[o_c].url=create;
-                    button_array[o_c].loop=false;
-                    seek_nosound_time(o_c);//,button_array[o_c].data
+                for(let j=0;j<button_array.length;j++){
+                    if(button_array[j].order==o_num){
+                        //console.log("j="+j);
+                        button_array[j].name=file_array[i].name;
+                        button_array[j].type=file_array[i].type;
+                        button_array[j].data=file_array[i];
+                        let create=URL.createObjectURL(file_array[i]);// faster than readAsDataURL()
+                        button_array[j].url=create;
+                        button_array[j].loop=false;
+                        seek_nosound_time(j);//,button_array[num].data
+                        break;
+                    }
                 }
-                o_c++;
             }
-            else{
-                alert_count++;
-            }
+            o_num++;
+        }
+        else{
+            alert_count++;
         }
     }
     debi("selected_data").value="";
@@ -607,8 +873,7 @@ function seek_alert_off(){
 }
 
 function seek_nosound_time(num){
-    console.log("num="+num);
-    //let animationId;
+    //console.log("num="+num);
     const audioElement = new Audio(button_array[num].url);
     let context = new AudioContext();
     let nodeSource = context.createMediaElementSource(audioElement);//
@@ -618,15 +883,7 @@ function seek_nosound_time(num){
     nodeAnalyser.fftSize = FFT_SIZE;
     nodeSource.connect(nodeAnalyser);
     let running;
-    //let conti_stop=0;
-    //let seek_start;
-	//let seek_end=0;
     let visloop=()=>{
-        console.log("visloop in")
-		/*if(seek_start===undefined){
-			seek_start=timestamp;
-			console.log("seek_start="+seek_start);
-		}*/
 		const freqByteData = new Uint8Array(FFT_SIZE / 2);
 		nodeAnalyser.getByteFrequencyData(freqByteData);
 		for (let i = 0; i < freqByteData.length; i++){
@@ -634,19 +891,15 @@ function seek_nosound_time(num){
 			if(freqSum>5){
                 audioElement.pause();
                 running=audioElement.currentTime;//.toFixed(3)
-			    //conti_stop++;
-                clearInterval(button_array[num].visualizer);
+	            clearInterval(button_array[num].visualizer);
                 button_array[num].visualizer=undefined;
-                //cancelAnimationFrame(button_array[num].visualizer);
-                //seek_end=timestamp;
-                //let jikan_sa=seek_end-seek_start;//sound_in_time
-                console.log("num="+num+" running="+running);
-                if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
-                    if(running<0.35){
+                //console.log("num="+num+" running="+running);
+                if((user_device.indexOf("safari")>=0 && user_device.indexOf("version")>=0)){// || user_device.indexOf("iphone")>=0 || user_device.indexOf("ipad")>=0){
+                    if(running<0.3){
                         button_array[num].start=0;
                     }
                     else{
-                        let start_jikan=running%0.35;
+                        let start_jikan=running%0.3;
                         console.log(start_jikan);
                         if(start_jikan<0.1){
                             start_jikan+=0.1;
@@ -680,48 +933,10 @@ function seek_nosound_time(num){
                 break;
             }
 		}
-		//if(running===undefined){
-
-			//timestamp+=timestamp;
-			//button_array[num].visualizer = requestAnimationFrame(visloop);
-		//}	
- 		/*//else{
-            //console.log("audioElement.pause()");
-			audioElement.pause();
-            clearInterval(button_array[num].visualizer);
-            button_array[num].visualizer=undefined;
-			//cancelAnimationFrame(button_array[num].visualizer);
-			//seek_end=timestamp;
-			//let jikan_sa=seek_end-seek_start;//sound_in_time
-			console.log("num="+num+" running="+running);
-			if(running<0.2){
-				button_array[num].start=0;
-			}
-			else{
-				let start_jikan=running%0.2;
-				if(start_jikan<0.1){
-					start_jikan+=0.1;
-				}
-                start_jikan=running-start_jikan;
-				//console.log("start_jikan/1000="+start_jikan/1000);
-				button_array[num].start=start_jikan;
-			}
-			assign_count--;
-			assign_data(num);
-			if(assign_count==0){
-				seek_alert_off();
-			}
-		//}*/
 	}
-    /*let graph_ing=()=>{
-        button_array[num].visualizer=requestAnimationFrame(visloop);
-	}*/
- 
  	//console.log("audioElement.play()");
     audioElement.play();
     button_array[num].visualizer=setInterval(()=>{visloop()},10);
-    //button_array[num].timer=setInterval(()=>{t_ing(num)},100);
-    //audioElement.addEventListener("play", graph_ing);
 }
 
 var file_id="";
@@ -830,14 +1045,12 @@ function double_tap(e){
                 trans_check=0;
 				console.log("never go to button_trans");
 				//console.log("trans_check="+trans_check);
-				//return false;
             }
         }
         else{
             //console.log("clearTimeout-ID="+long_down);
             trans_check=0;
             console.log("trans_check="+trans_check);
-            //return false;
         }
     }
     else{
@@ -845,9 +1058,7 @@ function double_tap(e){
     }
     //console.log("clearTimeout-ID="+long_down);
     trans_check=0;
-    //return false;
 }
-
 
 document.oncontextmenu =(e)=>{//right click safari ???
     e.stopPropagation();
@@ -855,12 +1066,12 @@ document.oncontextmenu =(e)=>{//right click safari ???
 
     if(e.target.id){
         if(e.target.id.indexOf("bld-")>=0){
-			file_id=e.target.id;
+			file_id=e.target.id;//debi("bld-")
+            console.log("file_id="+file_id);
 			let num=Number(e.target.id.split("-")[1]);
             if(debi("movie-"+e.target.id.split("-")[1]).innerHTML==""){
-                if(window.navigator.userAgent.toLowerCase().indexOf("safari")>=0 && window.navigator.userAgent.toLowerCase().indexOf("version")>=0){
-                    console.log(window.navigator.userAgent.toLowerCase());
-                    //alert('sorry safari assigns by only drag & drop');
+                if((user_device.indexOf("safari")>=0 && user_device.indexOf("version")>=0) || user_device.indexOf("iphone")>=0 || user_device.indexOf("ipad")>=0){
+                    console.log("safari&ipad");
                     double_tap(e);
                 }
                 else{
@@ -869,7 +1080,6 @@ document.oncontextmenu =(e)=>{//right click safari ???
                         debi("selected_data").click();// onchange="link_data()"
                     }
                 }
-                //return false;
 			}
             else{
 				let config_page='<div class="right_click_lay_div">';
@@ -929,27 +1139,20 @@ document.oncontextmenu =(e)=>{//right click safari ???
 				debi("loop").checked=button_array[num].loop;
 				//console.log("debi(loop).checked="+debi("loop").checked);
 				debi("each").value=debi("each_qty").innerHTML=(button_array[num].volume*10).toFixed(1);
-				//clearTimeout(long_down);
 				//console.log("clearTimeout-ID="+long_down);
                 trans_check=0;
 				console.log("never go to button_trans");
 				//console.log("trans_check="+trans_check);
-				//return false;
             }
         }
         else{
-            //clearTimeout(long_down);
             //console.log("clearTimeout-ID="+long_down);
             trans_check=0;
             console.log("trans_check="+trans_check);
-            //return false;
         }
     }
-    //clearTimeout(long_down);
     //console.log("clearTimeout-ID="+long_down);
     trans_check=0;
-    //return false;
-
 };
 
 function play_whr(num){
@@ -968,11 +1171,9 @@ function play_whr(num){
 function play_end(num){
     if(debi("loop").checked){
         button_array[num].loop=true;
-        //debi("mov-"+num).loop=true;
     }
     else{
         button_array[num].loop=false;
-        //debi("mov-"+num).loop=false;
     }
     //console.log("debi(mov-"+num+").loop="+debi("mov-"+num).loop);
     button_array[num].content=debi("b-"+num).innerHTML;
@@ -1008,10 +1209,24 @@ function clear_no(num){
 }
 
 function clear_data(num){
-	debi("b-"+num).style.backgroundColor="hsla("+button_array[num].color+",0%,75%,1.00)";
-    debi("b-"+num).style.border="2px solid hsla("+button_array[num].color+",0%,50%,1.00)";
-    debi("bnn-"+num).className="b_number_off";
-    debi("bnn-"+num).style.color="hsla("+button_array[num].color+",0%,100%,1.00)";//white
+    if(colorb_c==1){
+        //let hue_num=button_array[num].color=180-(360/order_array.length)*i;
+        //debi("b-"+num).style.backgroundColor="hsla("+hue_num+",70%,50%,0.60)";
+        //debi("b-"+num).style.borderTop="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+        //debi("b-"+num).style.borderLeft="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+        //debi("b-"+num).style.borderBottom="4px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+        //debi("b-"+num).style.borderRight="4px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+        //debi("bnn-"+num).style.color="hsla("+hue_num+",90%,35%,0.80)";
+        //debi("btd-"+num).style.backgroundColor="hsla("+hue_num+",75%,45%,0.40)";
+        button_array[num].content="";
+        //debi("b-"+num).innerHTML;
+    }
+    else{
+        debi("b-"+num).style.backgroundColor="hsla("+button_array[num].color+",0%,75%,1.00)";
+        debi("b-"+num).style.border="2px solid hsla("+button_array[num].color+",0%,50%,1.00)";
+        debi("bnn-"+num).style.color="hsla("+button_array[num].color+",0%,100%,1.00)";//white
+        debi("bnn-"+num).className="b_number_off";
+    }
     debi("bti-"+num).innerHTML="";
     debi("bt-"+num).innerHTML="";
     debi("bdn-"+num).innerHTML="";
@@ -1029,6 +1244,11 @@ function clear_data(num){
 	debi("clear_lay_background").style.display='none';
 	debi("right_click_lay").style.display='none';
 	debi("right_click_background").style.display='none';
+    for (let i = 0; i < FFT_SIZE/2; i++) {
+        debi("box-"+num+"_L-"+i).style.width = "0px";
+        debi("box-"+num+"_R-"+i).style.width = "0px";
+    }
+
 }
 
 function close_r_click(){
@@ -1040,9 +1260,9 @@ function close_r_click(){
 var array_num=-1
 var waiting_num=-1;
 var trans_check=0;
-//let long_down;
-document.addEventListener('click', (e)=>{
-    console.log("click !")
+document.addEventListener("click", (e)=>{
+    //console.log("click e.target.id="+e.target.id);
+    //console.log("click e.terget.parentNode.id="+e.target.parentNode.id);
     if(e.target.id){
         if(e.target.id.indexOf("bld-")>=0){
 			let num=Number(e.target.id.split("-")[1]);
@@ -1050,14 +1270,18 @@ document.addEventListener('click', (e)=>{
                 debi("b-"+num).draggable=false;
                 //console.log('click debi("b-'+num+'").draggable='+debi("b-"+num).draggable);
                 play_check(num);
-                //clearTimeout(long_down);
                 //console.log("clearTimeout-ID="+long_down);
                 trans_check=0;
             }
             else{
                 console.log("click not go to button_trans");           
             }
+            //console.log("click temp_array="+temp_array);
+            //console.log("click order_array="+order_array);
         }
+    }
+    else{
+        console.log("NULL");
     }
 });
 
@@ -1125,7 +1349,6 @@ function play_check(num){
 		}	
 	}
 	else{
- 		//non assigned
 	}
 }
 
@@ -1147,7 +1370,6 @@ function key_down(event){//
 				break;
 			}
 		}
-		//return false;
 	}
 }
 
@@ -1173,7 +1395,7 @@ function sound_fade_in(num){
                f_b_flick();
             }
             if(debi("bld-"+num).innerHTML==""){
-                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';//<span style="font-size:20px; color:hsla(0,0%,100%,1.00);">Fading</span>
+                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';
             }
             else{
                 debi("bld-"+num).innerHTML="";
@@ -1187,7 +1409,7 @@ function sound_fade_in(num){
                 f_b_flick();
             }
             if(debi("bld-"+num).innerHTML==""){
-                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';//<span style="font-size:20px; color:hsla(0,0%,100%,1.00);">Fading</span>
+                debi("bld-"+num).innerHTML='<span style="font-size:28pt;  font-weight:bold;transform: scale(1, 1.25); color:hsla(0,0%,100%,1.00);">IN</span>';
             }
             else{
                 debi("bld-"+num).innerHTML="";
@@ -1279,12 +1501,9 @@ function make_audio(num){
 /*start to play*/
 console.log("start to play");
 var fi_time=0;
-//var audioElement;
 const FFT_SIZE = 64;
 function start_to_play(num,fade){
-    //let audioElement = debi("mov-"+num);
     const context = new AudioContext();
-    //const nodeSource = context.createMediaElementSource(audioElement);//
     const nodeSource = context.createMediaElementSource(debi("mov-"+num));//
     button_array[num].gainNode = context.createGain();
     button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10;
@@ -1312,7 +1531,6 @@ function start_to_play(num,fade){
 
 	let visloop=()=>{
 		//console.log("visloop=()");
-        //button_array[num].visualizer=requestAnimationFrame(visloop);
 		// 波形データを格納する配列の生成
 		const freqByteData_L = new Uint8Array(FFT_SIZE / 2);
 		const freqByteData_R = new Uint8Array(FFT_SIZE / 2);
@@ -1331,9 +1549,6 @@ function start_to_play(num,fade){
 			debi("box-"+num+"_R-"+i).style.background=debi("btd-"+num).style.backgroundColor;
 			debi("box-"+num+"_L-"+i).style.width = (50*scale_L)+"px";
 			debi("box-"+num+"_R-"+i).style.width = (50*scale_R)+"px";
-            //debi("box-"+num+"_L-"+i).style.scale = `${scale} 1`;
-            //debi("box-"+num+"-"+i).style.scale = `1 ${scale}`;
-			//debi("box-"+num+"-"+i).style.height = (75*scale)+"px";
             //console.log("freqByteData = "+i);
 		}
 		button_array[num].visualizer=requestAnimationFrame(visloop);
@@ -1345,16 +1560,11 @@ function start_to_play(num,fade){
         button_array[num].fading=2;//sound_fade_in(num);
         debi("bld-"+num).style.backgroundColor="hsla("+button_array[num].color+",50%,50%,0.30)";
     }
-    //if(button_array[num].type.indexOf("audio")>=0){
-        console.log("debi(mov-"+num+").play()");
-        debi("mov-"+num).play();
-        graph_ing();
-        console.log("ended_count first");
-        button_array[num].on=1;
-    //}
-    //else{
-        //open("movie.html","Display Window",window_options);
-    //}
+    console.log("debi(mov-"+num+").play()");
+    debi("mov-"+num).play();
+    graph_ing();
+    //console.log("ended_count first");
+    button_array[num].on=1;
     button_array[num].timer=setInterval(()=>{t_ing(num)},100);
     let hue_num=button_array[num].color;
     debi("b-"+num).style.backgroundColor="hsla("+hue_num+",70%,50%,0.10)";
@@ -1362,41 +1572,23 @@ function start_to_play(num,fade){
     debi("b-"+num).style.borderLeft="2px solid "+"hsla("+hue_num+",90%,35%,0.80)";
     debi("b-"+num).style.borderBottom="2px solid "+"hsla("+hue_num+",90%,35%,0.80)";
     debi("b-"+num).style.borderRight="2px solid "+"hsla("+hue_num+",90%,35%,0.80)";
-    //debi("bnn-"+num).style.filter="blur(1px)";
     debi("bnn-"+num).style.color="hsla("+hue_num+",90%,35%,0.30)";
     debi("bdn-"+num).style.color="hsla("+hue_num+",90%,35%,0.80)";
     waiting_num=-1;
-    
-    /*debi("mov-"+num).addEventListener("playing", ()=>{//num=-1;
-        console.log("playing")
-        if(debi("mov-"+num).currentTime===0){
-            clearInterval(button_array[num].timer)//function name
-            button_array[num].timer=undefined;
-            debi("mov-"+num).currentTime=0+button_array[num].start;//seeked start time
-            console.log("playing debi(mov-"+num+").currentTime="+debi("mov-"+num).currentTime);
-            //debi("mov-"+num).play();
-            button_array[num].timer=setInterval(()=>{t_ing(num)},100);
-
-        }
-    });*/
-    
+     
     debi("mov-"+num).addEventListener("ended", ()=>{//num=-1;
 		console.log("ended in !");
 		if(button_array[num].loop==true){
             console.log("button_array["+num+"].loop="+button_array[num].loop);
             //console.log("debi(mov-"+num+").loop="+debi("mov-"+num).loop);
-            //cancelAnimationFrame(button_array[num].visualizer);
-            //button_array[num].visualizer=undefined;
 			clearInterval(button_array[num].timer)//function name
             button_array[num].timer=undefined;
             button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10
             //console.log("check");
-            //if(debi("mov-"+num)){
-                debi("mov-"+num).play();
-                debi("mov-"+num).currentTime=0+button_array[num].start;//seeked start time
-                console.log("ended debi(mov-"+num+").currentTime="+debi("mov-"+num).currentTime);
-                button_array[num].timer=setInterval(()=>{t_ing(num)},100);
-            //}
+            debi("mov-"+num).play();
+            debi("mov-"+num).currentTime=0+button_array[num].start;//seeked start time
+            console.log("ended debi(mov-"+num+").currentTime="+debi("mov-"+num).currentTime);
+            button_array[num].timer=setInterval(()=>{t_ing(num)},100);
         }
 		else{
 			console.log("ended to_end");
@@ -1432,7 +1624,6 @@ function to_end(num){
         for (let i = 0; i < FFT_SIZE/2; i++) {
             debi("box-"+num+"_L-"+i).style.width = "0px";
             debi("box-"+num+"_R-"+i).style.width = "0px";
-            //debi("box-"+num+"-"+i).style.height = "0px";
         }
     }
     else{
@@ -1443,11 +1634,9 @@ function to_end(num){
             for (let i = 0; i < FFT_SIZE/2; i++) {
                 debi("box-"+num+"_L-"+i).style.width = "0px";
                 debi("box-"+num+"_R-"+i).style.width = "0px";
-                //debi("box-"+num+"-"+i).style.height = "0px";
             }
         }
     }
-    //button_array[num].loop=debi("mov-"+num).loop;
     button_array[num].begining=debi("mov-"+num).currentTime;//生time
     button_array[num].fading=0;
     reassign(num);
@@ -1460,7 +1649,6 @@ function reassign(num){//stop & reflesh
     debi("mov-"+num).src=button_array[num].url;
     debi("mov-"+num).addEventListener("loadedmetadata", ()=>{
         debi("bt-"+num).innerHTML=data_duration(debi("mov-"+num).duration-button_array[num].start); 
-        //debi("mov-"+num).loop=button_array[num].loop;
         debi("mov-"+num).currentTime=button_array[num].begining;
         button_array[num].content=debi("b-"+num).innerHTML;
         prepare_button(num);
@@ -1498,7 +1686,6 @@ function slide_mr(){
         if(button_array[i].on==1){
             button_array[i].gainNode.gain.value=button_array[i].volume*m_v/10;
             break;
-            //debi("mov-"+i).volume = button_array[i].volume*m_v/10;
         }
         else{
             //open("movie.html","Display Window",window_options);
@@ -1512,7 +1699,6 @@ function slide_each(num){
     debi("each_qty").innerHTML=Number(debi("each").value).toFixed(1);
         if(button_array[num].on=1){
             button_array[num].gainNode.gain.value=button_array[num].volume*m_v/10;
-            //debi("mov-"+num).volume = button_array[num].volume*m_v/10;
             button_array[num].content=debi("b-"+num).innerHTML;
         }
         else{
@@ -1555,53 +1741,53 @@ document.addEventListener('dblclick', (e)=>{
                 debi("tool_bar").style.display="none";
             }
         }
-        /*else if(e.target.id=="close_div"){//たたみ
-            if(debi("master_div").style.display=="none"){
-                debi("master_div").style.display="flex";
-                debi("fader_div").style.display="flex";
+        else if(e.target.id=="button_background"){
+            if(colorb_c==0){
+                for(let i=0;i<button_array.length;i++){//order_a?
+                    let num=i;//order_array[i];//order_a?
+                    let hue_num=button_array[num].color=180-(360/order_array.length)*i;
+                    debi("b-"+num).style.backgroundColor="hsla("+hue_num+",70%,50%,0.60)";
+                    debi("b-"+num).style.borderTop="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+                    debi("b-"+num).style.borderLeft="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+                    debi("b-"+num).style.borderBottom="4px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+                    debi("b-"+num).style.borderRight="4px solid "+"hsla("+hue_num+",90%,35%,0.80)";
+                    debi("bnn-"+num).className="b_number_on";
+                    debi("bnn-"+num).style.color="hsla("+hue_num+",90%,35%,0.80)";
+                    debi("btd-"+num).style.backgroundColor="hsla("+hue_num+",75%,45%,0.40)";
+                    button_array[num].content=debi("b-"+num).innerHTML;
+                }
+                colorb_c=1;
             }
             else{
-                if(flick_on==0){
-                    fade_on=0;
-                    flick_on=0;
-                    debi("f_b").style.color="hsla(208,100%,97%,1.00)";
-                    debi("f_b_div").style.backgroundColor="hsla(0,0%,67%,1.00)";
-                    debi("master_div").style.display="none";
-                    debi("fader_div").style.display="none";
+                for(let i=0;i<button_array.length;i++){//order_a?
+                    let num=i;//order_array[i];//order_a?
+                    if(debi("mov-"+num)){
+                    }
+                    else{
+                        debi("b-"+num).style.backgroundColor="hsla("+button_array[num].color+",0%,75%,1.00)";
+                        debi("b-"+num).style.border="2px solid hsla("+button_array[num].color+",0%,50%,1.00)";
+                        debi("bnn-"+num).className="b_number_off";
+                        debi("bnn-"+num).style.color="hsla("+button_array[num].color+",0%,100%,1.00)";//white
+                        debi("bti-"+num).innerHTML="";
+                        debi("bt-"+num).innerHTML="";
+                        debi("bdn-"+num).innerHTML="";
+                        debi("bdn-"+num).innerHTML="";//white
+                        debi("movie-"+num).innerHTML="";    
+                    }
                 }
-                else{
-                    //return false;
-                }
-            }
-        }*/
-        else if(e.target.id=="button_background"){
-            for(let i=0;i<order_array.length;i++){
-                let num=order_array[i];
-                let hue_num=button_array[num].color=180-(360/order_array.length)*i;
-                debi("b-"+num).style.backgroundColor="hsla("+hue_num+",70%,50%,0.60)";
-                debi("b-"+num).style.borderTop="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
-                debi("b-"+num).style.borderLeft="0px solid "+"hsla("+hue_num+",90%,35%,0.80)";
-                debi("b-"+num).style.borderBottom="4px solid "+"hsla("+hue_num+",90%,35%,0.80)";
-                debi("b-"+num).style.borderRight="4px solid "+"hsla("+hue_num+",90%,35%,0.80)";
-                debi("bnn-"+num).className="b_number_on";
-                debi("bnn-"+num).style.color="hsla("+hue_num+",90%,35%,0.80)";
-                //debi("bti-"+num).innerHTML=debi("mov-"+num).currentTime.toFixed(1)+"/";
-                debi("btd-"+num).style.backgroundColor="hsla("+hue_num+",75%,45%,0.40)";
-                //debi("bdn-"+num).style.color="hsla(0,0%,100%,1.00)";
-                //debi("bld-"+num).style.backgroundColor="hsla(0,0%,100%,0.00)";
-                //debi("bld-"+num).innerHTML="";
-                //debi("mov-"+num).volume=button_array[num].volume*m_v/10
-                button_array[num].content=debi("b-"+num).innerHTML;
+                colorb_c=0;
             }
         }
         else{
-            //return false;
         }
     }
-    else{
-        //return false;
+    else if(e.target.id.indexOf("b-")>=0){
+        e.stopPropagation();
+        e.preventDefault();
+    
     }
-    //return false;
+    else{
+    }
 });
 
 var fade_on=0;
